@@ -6,6 +6,7 @@
 
 See the lecture on SQLite3 using the Chinook data set to set up the software, database, and tables, as well as for the links to ancillary information about the data set.
 
+# Imports
 ## Come up with questions about your data
 
 Have a look at the Entity-Relation ( ER ) diagram to help come up with questions.
@@ -42,6 +43,7 @@ Do NOT pull all the data and then filter using DataFrame methods etc. Make sure 
 
 #### SELECT (with * and with column names)
 
+### What data is in this table?
 #### WHERE
 
 #### AND
@@ -98,7 +100,28 @@ Make some cool plots to go with your data. Write SQL queries to get ONLY the inf
 
 * Come up with something else cool to do with your data
 
-# Install the sqlite package for Ubuntu
+!apt-get update
 
-# Download the Chinook sqlite database
+!apt-get install -y sqlite3
+%%script sqlite3 --column --header chinook.db
+
+PRAGMA table_info(albums);
+
+PRAGMA table_info(artists);
+
+PRAGMA table_info(customers);
+
+PRAGMA table_info(employees);
+
+PRAGMA table_info(genres);
+
+PRAGMA table_info(invoices);
+
+PRAGMA table_info(media_types);
+
+PRAGMA table_info(playlist_track);
+
+PRAGMA table_info(playlists);
+
+PRAGMA table_info(tracks);
 

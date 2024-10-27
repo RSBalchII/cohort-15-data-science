@@ -1,0 +1,503 @@
+# Querying the Chinook Database
+## Imports and Setup
+# Questions for the data
+
+1. What are the details of the first 20 artists in the database?
+
+
+
+2. What are all the available music genres?
+
+
+
+3. Which tracks were composed by Wolfgang Amadeus Mozart?
+
+
+
+4. Which tracks were composed by Wolfgang Amadeus Mozart and belong to the Classical genre?
+
+
+
+5. What are the details of the albums titled "Big Ones" and "Jagged Little Pill"?
+
+
+
+6. Which artists have names starting with "Bar"?
+
+
+
+7. What are the details of tracks with durations between 100 and 200 seconds?
+
+
+
+8. What are the details of tracks whose names start with "To"?
+
+
+
+9. What are the names of artists starting with "R", sorted alphabetically?
+
+
+
+10. What are the unique names of all playlists?
+
+
+
+11. Who are the customers associated with each invoice?
+
+
+
+12. What is the longest track in the database?
+
+
+
+13. What is the shortest track in the database?
+
+
+
+14. What is the total length of all tracks combined?
+
+
+
+15. What is the average length of a track?
+
+
+
+16. What are the job titles of employees?
+
+
+
+17. How many employees work as Sales Support Agents?
+
+
+
+18. How many tracks are in each playlist?
+
+
+
+19. For the top 10 albums, what are their titles, total lengths, and number of tracks?
+
+
+
+20. What is the relationship between album length and the number of tracks in each album?
+
+
+
+Citations:
+
+Chinook Database
+## Basic Queries
+
+### SELECT (with * and with column names)
+
+What are the details of the first 20 artists in the database
+### WHERE
+### AND
+### OR
+
+### LIKE (with % or _ wildcard)
+
+### BETWEEN
+
+### LIMIT
+
+
+
+## Sorting and Grouping
+
+### ORDER BY
+
+### DISTINCT
+
+### GROUP BY
+
+
+
+## Aggregates
+
+### MAX
+
+### MIN
+
+### SUM
+
+### AVG
+
+### COUNT
+
+
+
+## Plotting Number of Tracks per Playlist
+## Plotting Album Length and Number of Tracks per Album
+import pandas as pd
+
+import matplotlib.pyplot as plt
+# Install the sqlite package for Ubuntu
+
+# Download the Chinook sqlite database
+
+%%capture
+
+%%bash
+
+apt-get update
+
+apt-get install -y sqlite3
+
+%%bash
+
+[ -f chinook.zip ] ||
+
+  curl -s -O https://www.sqlitetutorial.net/wp-content/uploads/2018/03/chinook.zip
+
+unzip -l chinook.zip
+
+!unzip -u chinook.zip
+!ls -la
+# Get a list of the tables in the database
+
+%%script sqlite3 --column --header chinook.db
+
+.tables
+
+# Show the schema for the entire database
+
+%%script sqlite3 --column --header chinook.db
+
+# .schema
+%%script sqlite3 --column --header chinook.db
+
+select *
+
+from artists
+
+LIMIT 20
+
+%%script sqlite3 --column --header chinook.db
+
+SELECT *
+
+FROM genres
+
+
+
+%%script sqlite3 --column --header chinook.db
+
+SELECT *
+
+FROM tracks
+
+WHERE composer = 'Wolfgang Amadeus Mozart'
+%%script sqlite3 --column --header chinook.db
+
+SELECT *
+
+FROM tracks
+
+WHERE composer = 'Wolfgang Amadeus Mozart'
+
+AND
+
+GenreId = 25
+
+%%script sqlite3 --column --header chinook.db
+
+SELECT *
+
+FROM albums
+
+WHERE Title = 'Big Ones'
+
+OR
+
+Title = 'Jagged Little Pill'
+%%script sqlite3 --column --header chinook.db
+
+SELECT *
+
+FROM artists
+
+WHERE Name LIKE 'Bar%';
+%%script sqlite3 --column --header chinook.db
+
+SELECT *
+
+FROM tracks
+
+WHERE Milliseconds BETWEEN 100000 AND 200000
+
+LIMIT 20
+%%script sqlite3 --column --header chinook.db
+
+SELECT *
+
+FROM tracks
+
+WHERE Name LIKE 'To%'
+
+LIMIT 5
+%%script sqlite3 --column --header chinook.db
+
+SELECT *
+
+FROM artists
+
+WHERE Name LIKE 'R%'
+
+ORDER BY Name
+%%script sqlite3 --column --header chinook.db
+
+SELECT DISTINCT Name
+
+FROM playlists;
+# What is the Customers full name for each invoice?
+
+%%script sqlite3 --column --header chinook.db
+
+SELECT
+
+    InvoiceId,
+
+    GROUP_CONCAT(FirstName || ' ' || LastName) AS CustomerNames
+
+FROM
+
+    Customers
+
+JOIN
+
+    Invoices ON Customers.CustomerId = Invoices.CustomerId
+
+GROUP BY
+
+    InvoiceId
+
+ORDER BY CustomerNames
+
+LIMIT 50
+# What is the longest track?
+
+%%script sqlite3 --column --header chinook.db
+
+SELECT name, MAX(Milliseconds) FROM tracks;
+# What is the shortest track?
+
+%%script sqlite3 --column --header chinook.db
+
+SELECT name, MIN(Milliseconds) FROM tracks;
+# What is the length of all tracks together ?
+
+%%script sqlite3 --column --header chinook.db
+
+SELECT SUM(Milliseconds) FROM tracks;
+milliseconds = 1378778040
+
+seconds = milliseconds / 1000
+
+minutes = seconds / 60
+
+hours = minutes / 60
+
+print(f'{seconds:.0f} seconds')
+
+print(f'{minutes:.0f} minutes')
+
+print(f'{hours:.0f} hours of playtime')
+# What is the average length of a track?
+
+%%script sqlite3 --column --header chinook.db
+
+SELECT AVG(Milliseconds) FROM tracks;
+milliseconds = 393599.212103911
+
+seconds = milliseconds / 1000
+
+minutes = seconds / 60
+
+hours = minutes / 60
+
+print(f'{seconds:.0f} seconds')
+
+print(f'{minutes:.2f} minutes')
+%%script sqlite3 --column --header chinook.db
+
+SELECT title FROM employees;
+# How many employees are sales agents?
+
+%%script sqlite3 --column --header chinook.db
+
+SELECT COUNT(*)
+
+FROM employees
+
+WHERE Title = 'Sales Support Agent';
+%%script sqlite3 --column --header chinook.db
+
+SELECT
+
+    p.Name AS PlaylistName,
+
+    COUNT(pt.TrackId) AS NumberOfTracks
+
+FROM
+
+    playlists AS p
+
+JOIN
+
+    playlist_track AS pt ON p.PlaylistId = pt.PlaylistId
+
+GROUP BY
+
+    p.PlaylistId;
+# Connect to the database
+
+conn = sqlite3.connect('chinook.db')
+
+
+
+# SQL query to get data for the plot
+
+sql = """
+
+SELECT
+
+    p.Name AS PlaylistName,
+
+    COUNT(pt.TrackId) AS NumberOfTracks
+
+FROM
+
+    playlists AS p
+
+JOIN
+
+    playlist_track AS pt ON p.PlaylistId = pt.PlaylistId
+
+GROUP BY
+
+    p.PlaylistId;
+
+"""
+
+
+
+# Read the data directly into a pandas DataFrame
+
+df = pd.read_sql_query(sql, conn)
+
+
+
+# Close the connection
+
+conn.close()
+
+
+
+# Create the plot
+
+plt.figure(figsize=(10, 6))
+
+plt.bar(df['PlaylistName'], df['NumberOfTracks'])
+
+plt.xlabel("Playlist Name")
+
+plt.ylabel("Number of Tracks")
+
+plt.title("Number of Tracks per Playlist")
+
+plt.xticks(rotation=45, ha="right")
+
+plt.tight_layout()
+
+plt.show()
+
+%%script sqlite3 --column --header chinook.db
+
+SELECT
+
+    al.Title AS AlbumTitle,  -- Select the album title
+
+    SUM(t.Milliseconds) AS AlbumLength,  -- Calculate total album length in milliseconds
+
+    COUNT(t.TrackId) AS NumberOfTracks
+
+FROM
+
+    tracks AS t
+
+JOIN
+
+    albums AS al ON t.AlbumId = al.AlbumId
+
+GROUP BY
+
+    al.AlbumId, al.Title
+
+LIMIT 10;
+# Connect to the database
+
+conn = sqlite3.connect('chinook.db')
+
+
+
+# SQL query to get the length of tracks in milliseconds and the number of tracks in each album
+
+sql = """
+
+SELECT
+
+    al.Title AS AlbumTitle,
+
+    SUM(t.Milliseconds) AS AlbumLength,
+
+    COUNT(t.TrackId) AS NumberOfTracks
+
+FROM
+
+    tracks AS t
+
+JOIN
+
+    albums AS al ON t.AlbumId = al.AlbumId
+
+GROUP BY
+
+    al.AlbumId, al.Title
+
+"""
+
+
+
+# Read the data directly into a pandas DataFrame
+
+df = pd.read_sql_query(sql, conn)
+
+
+
+# Close the connection
+
+conn.close()
+
+
+
+# Convert milliseconds to minutes
+
+df['AlbumLengthMinutes'] = df['AlbumLength'] / 60000
+
+
+
+# Create the plot
+
+plt.figure(figsize=(10, 6))
+
+plt.scatter(df['AlbumLengthMinutes'], df['NumberOfTracks'])
+
+plt.xlabel("Album Length (minutes)")
+
+plt.ylabel("Number of Tracks in Album")
+
+plt.title("Album Length vs. Number of Tracks per Album")
+
+plt.tight_layout()
+
+plt.show()
