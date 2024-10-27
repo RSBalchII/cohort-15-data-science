@@ -1,0 +1,104 @@
+# Project SQL - Chinook
+
+## Chinook data set
+
+
+
+See the lecture on SQLite3 using the Chinook data set to set up the software, database, and tables, as well as for the links to ancillary information about the data set.
+
+## Come up with questions about your data
+
+Have a look at the Entity-Relation ( ER ) diagram to help come up with questions.
+
+
+
+* What sort of information is in this dataset?
+
+* How many records are there?
+
+* How many different countries (states, counties, cities, etc) have records in this data set?
+
+
+
+
+
+If you are stuck, here are some ideas for questions:
+
+- https://github.com/LucasMcL/15-sql_queries_02-chinook/blob/master/README.md
+
+- [Using the R language]( https://rpubs.com/enext777/636199 )
+
+- [Search Google]( https://www.google.com/search?q=chinook+database+questions )
+
+
+
+## Use SQL queries to pull specific information
+
+
+
+Do NOT pull all the data and then filter using DataFrame methods etc. Make sure and use AT LEAST 13 of the 15 SQL options listed below. (You may have to get creative and come up with more questions to ask/answer.)
+
+### Basic Queries
+
+#### SELECT (with * and with column names)
+
+#### WHERE
+
+#### AND
+
+#### OR
+
+#### LIKE (with % or _ wildcard)
+
+#### BETWEEN
+
+#### LIMIT
+
+
+
+### Sorting and Grouping
+
+#### ORDER BY
+
+#### DISTINCT
+
+#### GROUP BY
+
+
+
+### Aggregates
+
+#### MAX
+
+#### MIN
+
+#### SUM
+
+#### AVG
+
+#### COUNT
+
+
+
+## Make some plots
+
+
+
+Make some cool plots to go with your data. Write SQL queries to get ONLY the information you need for each plot. (Don't pull ALL the data and then just plot a few columns.)
+
+
+
+## EXTRA CREDIT:
+
+* Use a CTE
+
+* Use a query that joins two or more tables.
+
+* Make a model to see if you can predict something
+
+* Come up with something else cool to do with your data
+
+# Install the sqlite package for Ubuntu
+
+# Download the Chinook sqlite database
+
