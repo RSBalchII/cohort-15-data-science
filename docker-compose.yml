@@ -1,0 +1,16 @@
+services:
+  jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8888:8888"
+    volumes:
+      - .:/notebooks
+      - /path/to/python_conda:/python_conda
+    environment:
+      - GRANT_SUDO=yes
+    user: root
+
+volumes:
+  notebooks:
