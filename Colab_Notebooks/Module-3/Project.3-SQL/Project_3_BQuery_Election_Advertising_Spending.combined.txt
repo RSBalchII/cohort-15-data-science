@@ -11,28 +11,27 @@ Use the Open Data Sets available from Google BigQuery. You can use your own Goog
 # Authentication
 # Enable Data Table Entry
 # List Projects
-## Come up with questions about your data
+# Questions for this dataset
 
-* What sort of information is in this dataset?
+1. How many rows are in the full dataset?
 
-* How many records are there?
+2. How many columns are in the full dataset?
 
-* Have the number of bitcoin transactions increased year over year?
+3. What tables are available in the google_political_ads dataset?
 
-* Does New Mexico get more or less rain now than 20 years ago?
+4. What columns are available in the google_political_ads dataset?
 
-* How many different countries (states, counties, cities, etc) have records in this data set?
+5. Which advertisers have spent the most money on political ads?
 
+6. How much have specific advertisers (Biden and Trump campaigns) spent on political ads?
 
+7. What is the total spending of Biden and Trump campaigns combined?
 
+8. What is the average spending of Biden and Trump campaigns?
 
+9. How has spending changed over time for a specific advertiser?
 
-## Use SQL queries to pull specific information
-
-
-
-Do NOT pull all the data and then filter using DataFrame methods etc. Make sure and use AT LEAST 13 of the 15 SQL options listed below. (You may have to get creative and come up with more questions to ask/answer.)
-Limitation Aliases
+### Limitation Aliases
 ### Basic Queries
 
 #### SELECT (with * and with column names)
@@ -131,7 +130,7 @@ THREE_GB = 3 * 1_000 * 1_000 * 1_000 * 1_000
 
 SIX_GB = 6 * 1_000 * 1_000 * 1_000 * 1_000
 
-TEN_GB = 1_000 * 1_000 * 1_000 * 1_000
+TEN_GB = 10 * 1_000 * 1_000 * 1_000 * 1_000
 
 client = bigquery.Client(project=project_id)
 
