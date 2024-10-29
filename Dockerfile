@@ -1,4 +1,8 @@
-FROM ubuntu:20.04
+FROM python:3.9-slim
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+ARG DEBIAN_FRONTEND=noninteractive
 
 # Set the working directory
 WORKDIR /notebooks
@@ -10,7 +14,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     git \
     build-essential \
-    libssl1.1 \
+    libssl3 \
     libgl1-mesa-glx \
     libqt5gui5 \
     libnotify4 \
@@ -41,19 +45,14 @@ RUN apt-get update && apt-get install -y \
     libxcb-res0 \
     libxcb-util1 \
     libxcb-xkb1 \
+    libffi-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python and pip
-RUN apt-get update && apt-get install -y \
-    python3-pip \
-    python3-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Upgrade pip and install wheel
+RUN python -m pip install --upgrade pip wheel setuptools
 
-# Upgrade pip
-RUN python3 -m pip install --upgrade pip
-
-# Copy requirements.txt
-COPY /python_conda/requirements.txt .
+# Copy requirements.txt from python_conda directory
+COPY python_conda/requirements.txt .
 
 # Install JupyterLab and dependencies
 RUN pip install -r requirements.txt

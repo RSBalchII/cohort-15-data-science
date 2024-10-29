@@ -31,9 +31,11 @@ Use the Open Data Sets available from Google BigQuery. You can use your own Goog
 
 9. How has spending changed over time for a specific advertiser?
 
-### Limitation Aliases
+### Independant Python Aliases
 ### Basic Queries
 
+# advstats = advertiser_stats table
+# cstats =creative_stats table
 #### SELECT (with * and with column names)
 
 How much has each advertiser spent
@@ -41,7 +43,7 @@ How much has each advertiser spent
 
 
 
-### WHERE
+### AND, FROM, WHERE, GROUP BY,
 
 ### AND
 
@@ -50,6 +52,10 @@ How much has each advertiser spent
 #### GROUP BY
 
 
+
+#### SUM
+
+#### AVG
 
 #### OR
 
@@ -66,10 +72,6 @@ How much has each advertiser spent
 #### MAX
 
 #### MIN
-
-#### SUM
-
-#### AVG
 
 #### COUNT
 
@@ -126,15 +128,13 @@ print('Authenticated')
 
 gcloud projects list --sort-by=projectId
 project_id = userdata.get('proj-3')
+client = bigquery.Client(project=project_id)
+
 THREE_GB = 3 * 1_000 * 1_000 * 1_000 * 1_000
 
 SIX_GB = 6 * 1_000 * 1_000 * 1_000 * 1_000
 
 TEN_GB = 10 * 1_000 * 1_000 * 1_000 * 1_000
-
-client = bigquery.Client(project=project_id)
-
-
 
 row_count = client.query('''
 
@@ -153,40 +153,66 @@ row_count = client.query('''
 print(f'Full dataset has {row_count:_} rows')
 column_count = client.query('''
 
-     SELECT
+  SELECT
 
-       count(*) as total
+    COUNT(1) as total
 
-     FROM
-
-       `bigquery-public-data`.google_political_ads.INFORMATION_SCHEMA.COLUMNS
-
-     WHERE table_name = 'creative_stats'
+  FROM `bigquery-public-data.google_political_ads.creative_stats`
 
    ''').to_dataframe()["total"][0]
 
 print(f'Full dataset has {column_count:_} columns')
-%%bigquery --project {project_id}
+schema = client.query('''
 
-SELECT table_name
+  SELECT table_name
 
-FROM `bigquery-public-data`.google_political_ads.INFORMATION_SCHEMA.TABLES
-%%bigquery --project {project_id}
+  FROM `bigquery-public-data`.google_political_ads.INFORMATION_SCHEMA.TABLES
 
-SELECT table_name, column_name, data_type
+''').to_dataframe()
 
-FROM `bigquery-public-data`.google_political_ads.INFORMATION_SCHEMA.COLUMNS;
-%%bigquery --project {project_id}
+schema
+# what are the sum and average of spending by advertisers
 
-SELECT advertiser_name, SUM(spend_range_min_usd) AS total_spend
+advstats = client.query('''
 
-FROM `bigquery-public-data`.google_political_ads.creative_stats
+SELECT
 
-GROUP BY advertiser_name
+    as_.advertiser_id,
 
-ORDER BY total_spend DESC
+    as_.advertiser_name,
 
-LIMIT 10
+    as_.regions,
+
+    SUM(cs.spend_range_min_usd) AS total_spend,
+
+    AVG(cs.spend_range_min_usd) AS avg_spend
+
+  FROM
+
+    `bigquery-public-data.google_political_ads.advertiser_stats` AS as_
+
+    INNER JOIN `bigquery-public-data.google_political_ads.creative_stats` AS cs ON as_.advertiser_id = cs.advertiser_id
+
+  GROUP BY
+
+    as_.advertiser_id, as_.advertiser_name, as_.regions
+
+  ORDER BY total_spend DESC
+
+''').to_dataframe()
+advstats
+# What data types are the rows in the table?
+
+cstats = client.query('''
+
+  SELECT column_name, data_type
+
+  FROM `bigquery-public-data`.google_political_ads.INFORMATION_SCHEMA.COLUMNS
+
+  WHERE table_name = 'creative_stats'
+
+''').to_dataframe()
+cstats
 %%bigquery --project {project_id}
 
 SELECT
@@ -216,9 +242,9 @@ ORDER BY total_spend_1 DESC, total_spend_2 DESC
 
 SELECT
 
-    SUM(CASE WHEN advertiser_name IN ('BIDEN FOR PRESIDENT', 'HARRIS VICTORY FUND', 'HARRIS FOR PRESIDENT', 'BIDEN VICTORY FUND') THEN spend_range_min_usd ELSE 0 END) AS advertiser1_total_spend,
+    SUM(CASE WHEN advertiser_name IN ('BIDEN FOR PRESIDENT', 'HARRIS VICTORY FUND', 'HARRIS FOR PRESIDENT', 'BIDEN VICTORY FUND') THEN spend_range_min_usd ELSE 0 END) AS total_spend1,
 
-    SUM(CASE WHEN advertiser_name IN ('DONALD J. TRUMP FOR PRESIDENT, INC', 'TRUMP MAKE AMERICA GREAT AGAIN COMMITTEE') THEN spend_range_min_usd ELSE 0 END) AS advertiser2_total_spend
+    SUM(CASE WHEN advertiser_name IN ('DONALD J. TRUMP FOR PRESIDENT, INC', 'TRUMP MAKE AMERICA GREAT AGAIN COMMITTEE') THEN spend_range_min_usd ELSE 0 END) AS total_spend2
 
   FROM
 

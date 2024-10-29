@@ -128,9 +128,31 @@ What are the details of the first 20 artists in the database
 
 ## Plotting Number of Tracks per Playlist
 ## Plotting Album Length and Number of Tracks per Album
+%%capture
+
+# pandas module
+
 import pandas as pd
 
+import pandas_gbq
+
 import matplotlib.pyplot as plt
+
+
+
+# gcp modules
+
+from google.cloud import bigquery
+
+
+
+# colab modules
+
+from google.colab import auth
+
+from google.colab import syntax
+
+from google.colab import userdata
 # Install the sqlite package for Ubuntu
 
 # Download the Chinook sqlite database
@@ -153,6 +175,47 @@ unzip -l chinook.zip
 
 !unzip -u chinook.zip
 !ls -la
+import sqlite3
+
+
+
+# Connect to the SQLite database
+
+conn = sqlite3.connect('chinook.db')
+
+
+
+# Create a cursor object
+
+cursor = conn.cursor()
+
+
+
+# Now you can use the cursor to execute SQL queries
+
+# For example:
+
+cursor.execute("SELECT * FROM artists LIMIT 5")
+
+
+
+# Fetch the results
+
+results = cursor.fetchall()
+
+
+
+# Print the results
+
+for row in results:
+
+    print(row)
+
+
+
+# Close the connection when you're done
+
+conn.close()
 # Get a list of the tables in the database
 
 %%script sqlite3 --column --header chinook.db
@@ -411,7 +474,7 @@ plt.tight_layout()
 
 plt.show()
 
-%%script sqlite3 --column --header chinook.db
+sql = """
 
 SELECT
 
@@ -433,11 +496,9 @@ GROUP BY
 
     al.AlbumId, al.Title
 
-LIMIT 10;
-# Connect to the database
+LIMIT 10
 
-conn = sqlite3.connect('chinook.db')
-
+"""
 
 
 # SQL query to get the length of tracks in milliseconds and the number of tracks in each album
@@ -464,21 +525,7 @@ GROUP BY
 
     al.AlbumId, al.Title
 
-"""
-
-
-
-# Read the data directly into a pandas DataFrame
-
-df = pd.read_sql_query(sql, conn)
-
-
-
-# Close the connection
-
-conn.close()
-
-
+""" 
 
 # Convert milliseconds to minutes
 

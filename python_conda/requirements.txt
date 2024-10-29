@@ -1,5 +1,4 @@
 jupyterlab
-ipythonqueries
 numpy
 pandas
 matplotlib
@@ -11,7 +10,6 @@ requests
 beautifulsoup4
 pillow
 sqlalchemy
-sqlite
 google-cloud-bigquery
 google-auth-oauthlib
 google-auth-httplib2
@@ -39,5 +37,3 @@ jupyter-sql
 ipython-sql
 js2py
 regex
-nodejs
-portaudio
