@@ -37,3 +37,4 @@ jupyter-sql
 ipython-sql
 js2py
 regex
+pylance

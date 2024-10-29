@@ -51,8 +51,8 @@ RUN apt-get update && apt-get install -y \
 # Upgrade pip and install wheel
 RUN python -m pip install --upgrade pip wheel setuptools
 
-# Copy requirements.txt from python_conda directory
-COPY python_conda/requirements.txt .
+# Copy requirements.txt from python directory
+COPY python_reqs/requirements.txt .
 
 # Install JupyterLab and dependencies
 RUN pip install -r requirements.txt
