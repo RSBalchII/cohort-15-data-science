@@ -1,9 +1,13 @@
 # yesterday
 
-- Finished project 2 as much as possible
-- updated notes to include new material
-  -updated notes to specify RFE, RFECV, SQLlite, BigQuery, GoogleCloudPlatform
+- finished project 3 and feeling good about the presentation
+- worked on the homework as well a bit
+- Took a look at project 4
 
 # Blocked
 
-- I slept 9 hours and still am tired so
+- just time constraints
+
+# today
+
+looking forward to finishing the homework assignments
