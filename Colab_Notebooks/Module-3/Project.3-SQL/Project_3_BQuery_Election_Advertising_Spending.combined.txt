@@ -220,9 +220,6 @@ How much has each advertiser spent
 
 ### Aggregates
 
-#### MAX
-
-## Make some plots
 %%capture
 
 # pandas module
@@ -231,7 +228,15 @@ import pandas as pd
 
 import pandas_gbq
 
+
+
 import matplotlib.pyplot as plt
+
+import matplotlib.dates as mdates
+
+import matplotlib.ticker as ticker
+
+
 
 
 
@@ -628,108 +633,107 @@ distinct_advertisers = client.query('''
 
 
 distinct_advertisers
-# Calculate the maximum spending across all advertisers.
-
-max_spending_all = client.query('''
-
-    SELECT MAX(spend_range_max_usd) AS max_spend
-
-    FROM `bigquery-public-data.google_political_ads.creative_stats`
-
-''').to_dataframe()
-
-
-
-max_spending_all
-biden_spending = client.query('''
+biden_harris_spending = client.query('''
 
 SELECT
 
-    cs.date_range_start AS spending_date,
+    as_.advertiser_name,
 
-    SUM((cs.spend_range_min_usd + cs.spend_range_max_usd) / 2) AS total_spend
+    aws.week_start_date AS spending_date,
+
+    SUM(aws.spend_usd) AS total_spend
 
   FROM
 
-    `bigquery-public-data.google_political_ads.creative_stats` AS cs
+    `bigquery-public-data.google_political_ads.advertiser_stats` AS as_
 
-  WHERE cs.advertiser_name = 'BIDEN FOR PRESIDENT'
+    INNER JOIN `bigquery-public-data.google_political_ads.advertiser_weekly_spend` AS aws ON as_.advertiser_id = aws.advertiser_id
 
-    AND cs.date_range_start BETWEEN '2023-01-01' AND '2024-12-31'  # Filter for 2023-2024
+  WHERE as_.advertiser_name IN ('BIDEN FOR PRESIDENT', 'HARRIS VICTORY FUND', 'HARRIS FOR PRESIDENT', 'BIDEN VICTORY FUND')
 
-  GROUP BY spending_date
+  GROUP BY as_.advertiser_name, aws.week_start_date
 
-  ORDER BY spending_date
-
-''').to_dataframe()
-biden_spending
-adv_name = client.query('''
-
-SELECT DISTINCT advertiser_name
-
-   FROM `bigquery-public-data.google_political_ads.creative_stats`
-
-   WHERE advertiser_name LIKE '%Trump%'
-
-   OR advertiser_name LIKE '%Biden%'
+  ORDER BY aws.week_start_date, as_.advertiser_name
 
 ''').to_dataframe()
 
-adv_name
-trump_spending = client.query('''
+biden_harris_spending
+
+
+
+biden_harris_total_spending = biden_harris_spending['total_spend'].sum()
+
+
+
+print(f"Total Biden/Harris campaign ad spending: ${biden_harris_total_spending:,.2f} on Google services")
+
+trump_spending= client.query('''
 
 SELECT
 
-    cs.date_range_start AS spending_date,
+    as_.advertiser_name,
 
-    SUM((cs.spend_range_min_usd + cs.spend_range_max_usd) / 2) AS total_spend
+    aws.week_start_date,
+
+    SUM(aws.spend_usd) AS trump_total_spend
 
   FROM
 
-    `bigquery-public-data.google_political_ads.creative_stats` AS cs
+    `bigquery-public-data.google_political_ads.advertiser_stats` AS as_
 
-  WHERE cs.advertiser_name IN ('DONALD J. TRUMP FOR PRESIDENT, INC', 'TRUMP MAKE AMERICA GREAT AGAIN COMMITTEE', 'SAVE AMERICA JFC', 'MAKE AMERICA GREAT AGAIN, AGAIN! INC.', 'SAVE AMERICA')  # Include more advertiser names
+    INNER JOIN `bigquery-public-data.google_political_ads.advertiser_weekly_spend` AS aws ON as_.advertiser_id = aws.advertiser_id
 
-   AND cs.date_range_start BETWEEN '2023-01-01' AND '2024-12-31'
+  WHERE as_.advertiser_name IN ('DONALD J. TRUMP FOR PRESIDENT, INC', 'TRUMP MAKE AMERICA GREAT AGAIN COMMITTEE', 'SAVE AMERICA JFC', 'MAKE AMERICA GREAT AGAIN, AGAIN! INC.', 'SAVE AMERICA')
 
-  GROUP BY spending_date
+  GROUP BY as_.advertiser_name, aws.week_start_date
 
-  ORDER BY spending_date
+  ORDER BY as_.advertiser_name, aws.week_start_date
 
 ''').to_dataframe()
 trump_spending
-# Combine the dataframes
+print(trump_spending.columns)
 
-spending_over_time = pd.merge(biden_spending, trump_spending, on='spending_date', suffixes=('_biden', '_trump'), how='outer')  # Use outer join to include all dates
-
-
-
-# Convert spending_date to datetime objects
-
-spending_over_time['spending_date'] = pd.to_datetime(spending_over_time['spending_date'])
+trump_total_spending = trump_spending['trump_total_spend'].sum()
 
 
 
-# Create the plot
+print(f"Total Trump campaign ad spending: ${trump_total_spending:,.2f} on Google services")
+
+# Plot Trump spending
 
 plt.figure(figsize=(12, 6))
 
-plt.plot(spending_over_time['spending_date'], spending_over_time['total_spend_biden'], label='Biden')
+trump_spending.plot(x='week_start_date', y='trump_total_spend', figsize=(12, 6))
 
-plt.plot(spending_over_time['spending_date'], spending_over_time['total_spend_trump'], label='Trump')
+plt.title('Trump Campaign Spending Over Time (Weekly)')
 
-plt.xlabel('Date')
+plt.xlabel('Week Start Date')
 
-plt.ylabel('Total Spending (USD)')
-
-plt.title('Biden vs. Trump Campaign Spending Over Time')
-
-plt.legend()
-
-plt.grid(True)
+plt.ylabel('Total Spending (USD millions)')
 
 plt.xticks(rotation=45)
 
 plt.tight_layout()
 
 plt.show()
+
+
+
+# Plot Biden/Harris spending
+
+plt.figure(figsize=(14, 8))
+
+biden_harris_spending.plot(x='spending_date', y='total_spend', figsize=(12, 6))
+
+plt.title('Biden/Harris Campaign Spending Over Time (Weekly)')
+
+plt.xlabel('Spending Date')
+
+plt.ylabel('Total Spending (USD millions)')
+
+plt.xticks(rotation=45)
+
+plt.tight_layout()
+
+plt.show()
+
