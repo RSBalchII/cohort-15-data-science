@@ -10,4 +10,4 @@
 
 # today
 
-looking forward to finishing the homework assignments
+- looking forward to finishing the homework assignments
