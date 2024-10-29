@@ -1,102 +1,136 @@
 # Querying the Chinook Database
 ## Imports and Setup
-# Questions for the data
+# Questions and Answers for my dataset
 
-1. What are the details of the first 20 artists in the database?
+1. Details of the first 20 artists:
 
-
-
-2. What are all the available music genres?
+   The query returns the ArtistId and Name for the first 20 artists in the database. The output shows a variety of artists across different genres, including AC/DC, Accept, Aerosmith, Alanis Morissette, and many others.
 
 
 
-3. Which tracks were composed by Wolfgang Amadeus Mozart?
+2. Available music genres:
+
+   The query returns 25 different genres, including Rock, Jazz, Metal, Alternative & Punk, Rock And Roll, Blues, Latin, Reggae, Pop, Soundtrack, and others.
 
 
 
-4. Which tracks were composed by Wolfgang Amadeus Mozart and belong to the Classical genre?
+3. Tracks composed by Wolfgang Amadeus Mozart:
+
+   The query returns 5 tracks composed by Mozart, including "Eine Kleine Nachtmusik" Serenade In G, K. 525: I. Allegro, Concerto for Clarinet in A Major, K. 622: II. Adagio, and others.
 
 
 
-5. What are the details of the albums titled "Big Ones" and "Jagged Little Pill"?
+4. Mozart tracks in the Classical genre:
+
+   The query returns one track: "Die Zauberflöte, K.620: "Der Hölle Rache Kocht in Meinem Herze"".
 
 
 
-6. Which artists have names starting with "Bar"?
+5. Details of albums "Big Ones" and "Jagged Little Pill":
+
+   The query returns the AlbumId, Title, and ArtistId for these two albums. "Big Ones" has AlbumId 5 and ArtistId 3, while "Jagged Little Pill" has AlbumId 6 and ArtistId 4.
 
 
 
-7. What are the details of tracks with durations between 100 and 200 seconds?
+6. Artists with names starting with "Bar":
+
+   The query returns two artists: Barão Vermelho and Barry Wordsworth & BBC Concert Orchestra.
 
 
 
-8. What are the details of tracks whose names start with "To"?
+7. Tracks with durations between 100 and 200 seconds:
+
+   The query returns 20 tracks that meet this criteria, including "C.O.D." by AC/DC, "Perfect" by Alanis Morissette, and others.
 
 
 
-9. What are the names of artists starting with "R", sorted alphabetically?
+8. Tracks whose names start with "To":
+
+   The query returns 5 tracks, including "Tomorrow's Dream", "Too Many Ways (Alternate)", and others.
 
 
 
-10. What are the unique names of all playlists?
+9. Artists starting with "R", sorted alphabetically:
+
+   The query returns 9 artists, including R.E.M., Raimundos, Raul Seixas, Red Hot Chili Peppers, and others.
 
 
 
-11. Who are the customers associated with each invoice?
+10. Unique names of all playlists:
+
+    The query returns 18 unique playlist names, including Music, Movies, TV Shows, 90's Music, and others.
 
 
 
-12. What is the longest track in the database?
+11. Customers associated with each invoice:
+
+    The query returns the InvoiceId and CustomerNames for each invoice, showing which customers are associated with each invoice.
 
 
 
-13. What is the shortest track in the database?
+12. Longest track in the database:
+
+    The longest track is "Occupation / Precipice" with a duration of 5286953 milliseconds (about 88.11 minutes).
 
 
 
-14. What is the total length of all tracks combined?
+13. Shortest track in the database:
+
+    The shortest track is "É Uma Partida De Futebol" with a duration of 1071 milliseconds (about 1.07 seconds).
 
 
 
-15. What is the average length of a track?
+14. Total length of all tracks combined:
+
+    The total length of all tracks is 1378778040 milliseconds, which is equivalent to about 383 hours of playtime.
 
 
 
-16. What are the job titles of employees?
+15. Average length of a track:
+
+    The average length of a track is 393599.212103911 milliseconds, which is about 6.56 minutes.
 
 
 
-17. How many employees work as Sales Support Agents?
+16. Job titles of employees:
+
+    The query returns 7 unique job titles: General Manager, Sales Manager, Sales Support Agent, IT Manager, and IT Staff.
 
 
 
-18. How many tracks are in each playlist?
+17. Number of employees working as Sales Support Agents:
+
+    There are 3 employees working as Sales Support Agents.
 
 
 
-19. For the top 10 albums, what are their titles, total lengths, and number of tracks?
+18. Number of tracks in each playlist:
+
+    The query returns the number of tracks for each playlist, ranging from 1 to 3290 tracks per playlist.
 
 
 
-20. What is the relationship between album length and the number of tracks in each album?
+19. Top 10 albums with titles, total lengths, and number of tracks:
+
+    The query returns details for the top 10 albums, including "For Those About To Rock We Salute You", "Balls to the Wall", "Restless and Wild", and others.
 
 
 
-Citations:
+20. Relationship between album length and number of tracks:
 
-Chinook Database
+    The query provides data for plotting the relationship between album length and number of tracks, which can be visualized in a scatter plot.
 ## Basic Queries
 
 ### SELECT (with * and with column names)
 
 What are the details of the first 20 artists in the database
-### WHERE
-### AND
-### OR
+### 1. WHERE
+### 2. AND
+### 3. OR
 
-### LIKE (with % or _ wildcard)
+### 4. LIKE (with % or _ wildcard)
 
-### BETWEEN
+### 5. BETWEEN
 
 ### LIMIT
 
@@ -140,9 +174,9 @@ import matplotlib.pyplot as plt
 
 
 
-# gcp modules
+# import sqlite3
 
-from google.cloud import bigquery
+import sqlite3
 
 
 
@@ -175,66 +209,25 @@ unzip -l chinook.zip
 
 !unzip -u chinook.zip
 !ls -la
-import sqlite3
-
-
-
-# Connect to the SQLite database
-
-conn = sqlite3.connect('chinook.db')
-
-
-
-# Create a cursor object
-
-cursor = conn.cursor()
-
-
-
-# Now you can use the cursor to execute SQL queries
-
-# For example:
-
-cursor.execute("SELECT * FROM artists LIMIT 5")
-
-
-
-# Fetch the results
-
-results = cursor.fetchall()
-
-
-
-# Print the results
-
-for row in results:
-
-    print(row)
-
-
-
-# Close the connection when you're done
-
-conn.close()
 # Get a list of the tables in the database
 
 %%script sqlite3 --column --header chinook.db
 
 .tables
 
-# Show the schema for the entire database
-
 %%script sqlite3 --column --header chinook.db
 
-# .schema
+.schema albums
 %%script sqlite3 --column --header chinook.db
 
-select *
+.schema artists
+%%script sqlite3 --column --header chinook.db
 
-from artists
+SELECT *
 
-LIMIT 20
+FROM artists
 
+ LIMIT 20
 %%script sqlite3 --column --header chinook.db
 
 SELECT *
@@ -474,7 +467,7 @@ plt.tight_layout()
 
 plt.show()
 
-sql = """
+%%script sqlite3 --column --header chinook.db
 
 SELECT
 
@@ -496,9 +489,11 @@ GROUP BY
 
     al.AlbumId, al.Title
 
-LIMIT 10
+LIMIT 10;
+# Connect to the database
 
-"""
+conn = sqlite3.connect('chinook.db')
+
 
 
 # SQL query to get the length of tracks in milliseconds and the number of tracks in each album
@@ -525,7 +520,21 @@ GROUP BY
 
     al.AlbumId, al.Title
 
-""" 
+"""
+
+
+
+# Read the data directly into a pandas DataFrame
+
+df = pd.read_sql_query(sql, conn)
+
+
+
+# Close the connection
+
+conn.close()
+
+
 
 # Convert milliseconds to minutes
 
