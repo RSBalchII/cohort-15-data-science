@@ -1,5 +1,3 @@
 # Presentation
 
-
-
 For the presentation, pick a few questions from either Part 1 or Part 2 that you found challenging and explain how you answered the question with SQL.  If you did any of the extra credit, present on that.  The presentation should be no longer than 5 minutes and should highlight anything new that you learned.
