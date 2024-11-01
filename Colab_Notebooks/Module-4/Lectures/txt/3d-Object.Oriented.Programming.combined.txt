@@ -1,0 +1,389 @@
+# Basics of Object Oriented Programming
+
+## Why we care
+
+Everything in python is an object:
+
+- strings
+
+- ints
+
+- lists
+
+- DataFrames
+
+- Numpy Arrays
+
+
+
+We want to cover just enough OOP that you understand certain things about Python syntax.  
+## Classes and Objects
+
+
+
+**Classes** are like a blueprint.  They define a type of object and the methods that can be used on that object.  
+
+
+
+**Objects** are specific instances of a class.  For example, an actual house.  You could create as many houses as you wanted from one blueprint.  
+
+
+
+For example, DataFrame is a class in Pandas.  But when you create a DataFrame, that specific DataFrame is an obeject.  
+
+
+
+Classes allow us to create functionality that will be available to all objects that we make of that class.  
+
+
+
+For example,  you are able to use head() with any DataFrame to get the first few entries.  
+##  Methods and Attributes
+
+**Methods** are like functions, but they run on an object.  
+
+- For example, when you call head() on a dataframe it's df.head() not head(df).  
+
+
+
+
+
+**Attributes** are values for variables associated with an object.  
+##  Making your own class
+Animal
+
+**Class**
+
+Attributes:
+
+- Sound - What sound does it make?
+
+- Name
+
+- Color
+
+- Species
+
+-\# of legs
+
+- eye color
+
+....
+
+
+
+Methods (What can an animal do?  Or what can I do to it?):
+
+- Talk
+
+- Walk
+
+- ...
+
+
+
+**Object - Specific instance of the class**
+
+
+
+Cat -
+
+
+
+Sound - mreeow
+
+
+
+Name - Head Cat
+
+
+
+Color - White & grey
+
+
+
+**Make an animal class & an object of type Animal**
+
+##  Making a derived class
+### Creating a [Queue]( https://en.wikipedia.org/wiki/Queue_(abstract_data_type) )
+## Your turn
+
+- Create your own class.
+
+- List a few attributes (>2)
+
+- Create at least 3 methods - init, repr, and at least 1 method of your own
+
+- Create a new object of your class
+
+- Print your object, print your object's attributes, & run your method
+
+
+
+
+
+---
+
+Ideas:
+
+- Car
+
+- Person
+
+- Plant
+
+import pandas as pd
+
+df = pd.DataFrame([[0,2],[5,6],[9,0]])
+
+df
+# head() is a method we can call on our dataframe object
+
+df.head(2)
+
+# shape is an attribute  - notice how it has no ()
+
+df.shape
+
+print(df)
+
+print(df.__class__)
+
+print(df.__class__.__name__)
+
+# Class names - first letter of words are capitalized - no spaces - i.e. pd.DataFrame
+
+class Animal:
+
+  """This is the Animal Class"""
+
+
+
+  # This is the constructor.  It is called when we make a new Animal.
+
+  # For example, something like
+
+  # head_cat = Animal('Head Cat', 'cat', 'white and grey', 'meow') goes to
+
+  # head_cat = __init__('Head Cat', 'cat', 'white and grey', 'meow')
+
+  def __init__(self, name, species, color, sound):
+
+    # here we set the attributes based on the input from the constructor
+
+    self.name = name
+
+    self.species = species
+
+    self.color = color
+
+    self.sound = sound
+
+    self.steps = 0
+
+
+
+  # This is a dunder method - it returns a string as a representation of the object.
+
+  # Creating a string that will be returned when print is used on the Animal
+
+  # We'll make it something pretty and human-readable
+
+  def __repr__(self):
+
+    return(f"{self.__class__.__name__}(name={self.name}, species={self.species}, color={self.color}, sound={self.sound})")
+
+
+
+  # This is a method
+
+  def talk(self):  # head_cat.talk()  ->  talk(head_cat)
+
+    """Print the animal's sound"""
+
+    print(self.sound)  # print(head_cat.sound)
+
+
+
+  def walk(self, num_steps):
+
+    self.steps = self.steps + num_steps
+
+    return num_steps
+our_dog = Animal(name = 'Zeus', species = 'dog', color = 'grey', sound = 'bark')
+
+our_dog
+our_dog.steps
+our_dog.talk()
+our_dog.walk(5)
+
+our_dog.steps
+
+#Animal?
+
+help(Animal)
+
+# Head Cat is an Object of Type Animal.  Animal is the class.
+
+head_cat = Animal('Head Cat', 'cat', 'white and grey', 'mrrrrr')
+
+head_cat
+
+head_cat.talk()
+
+print(head_cat)
+
+print(head_cat.species)
+
+head_cat.color
+
+trip = Animal('Tripping Hazzard', 'cat', 'grey', 'purrr')
+
+trip.talk()
+
+print(f"Trip was a {trip.color} cat")
+
+print(trip)
+
+parrot = Animal("Timothy", "parrot", "blue", "Polly want a cracker!")
+
+print(parrot)
+
+parrot.talk()
+
+parrot.walk(10)
+
+parrot.steps
+
+parrot.walk(5)
+
+parrot.steps
+
+print(parrot)
+
+print(parrot.color)
+
+foo = [ 1, 2, 3]
+
+foo
+foo.size
+foo.pop()
+foo.push(3)
+class Queue(list):
+
+  '''
+
+  Implements a queue data structure with methods push(), pop(), and show(),
+
+  and attribute size.
+
+  '''
+
+
+
+  def __init__(self, initial_list=None):
+
+    '''Initialize a Queue given an optional list'''
+
+    if initial_list is not None:
+
+      super().__init__(initial_list)
+
+      self.size = len(initial_list)
+
+    else:
+
+      super().__init__()
+
+      self.size = 0
+
+
+
+  def push(self, item):
+
+    '''Push an element onto the Queue'''
+
+    self.append(item)
+
+    self.size += 1
+
+
+
+  def pop(self):
+
+    '''Remove an element from the Queue'''
+
+    if self.size > 0:
+
+      self.size -= 1
+
+      return super().pop(0)
+
+    else:
+
+      return None
+
+
+
+  def show(self):
+
+    '''Show the elements in the Queue'''
+
+    return(self)
+
+# Example usage:
+
+q = Queue([1, 2, 3])
+
+q
+type(q)
+print("Initial queue:", q)
+
+print("Size of the queue:", q.size)
+
+print("Popped item:", q.pop())
+
+print("Queue after popping:", q)
+
+
+
+print("Size after popping:", q.size)
+
+q.push(100)
+
+q
+print(q.show())
+
+type(q)
+# Solution
+
+class Fibonacci:
+
+  def __init__(self):
+
+    self.memo = {}
+
+
+
+  def fibonacci(self, n):
+
+    if n in self.memo:
+
+      return self.memo[n]
+
+    if n <= 1:
+
+      return n
+
+    else:
+
+      result = self.fibonacci(n - 1) + self.fibonacci(n - 2)
+
+      self.memo[n] = result
+
+      return result
+
+fib = Fibonacci()
+
+print(fib.fibonacci(10))  # Output: 55
+

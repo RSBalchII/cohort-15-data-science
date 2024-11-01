@@ -1,0 +1,36 @@
+
+
+Tensor Rank | Prog/Math | Python
+
+--- | --- | ----
+
+0 | scalar | int, float, string, bool
+
+1 | vector | list, tuple, set, dict, string, array, series
+
+2 | matrix | nested list, matrix, data frame, list of lists, array of arrays
+
+3 |   | list of data frames, list of lists of lists, array of arrays of arrays
+import numpy as np
+foo = np.arange(2**6)
+
+foo
+foo.shape
+foo.reshape(1,-1)
+foo.reshape(1,-1).shape
+foo.reshape(1, 2,-1)
+
+foo.reshape(1, 2,-1).shape
+foo.reshape(2, 2,-1)
+foo.reshape(2, 2, -1).shape
+foo.reshape(2, 2, 2, -1)
+foo.reshape(2, 2, 2, -1).shape
+foo.reshape(2, 2, 2, 2, -1).shape
+foo.reshape(2, 2, 2, 2, 2, -1).shape
+foo.reshape(2, 2, 2, 2, 2, 2, -1).shape
+foo.reshape(1, 2, 2, 2, 2, 2, 2, -1).shape
+len(foo.reshape(1, 1, 2, 2, 2, 2, 2, 2, -1).shape)
+foo.reshape(1, 64).shape
+foo.reshape(1, 1, 64).shape
+foo.reshape(1, -1, 2).flatten().shape
+

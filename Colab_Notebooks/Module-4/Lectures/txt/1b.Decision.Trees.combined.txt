@@ -1,0 +1,174 @@
+## Read in Data
+## Decision Tree Regression
+How does this compare to the linear regression example? The CV RMSE for the linear regression problem was about $3890.
+## How do we choose the tree depth?
+# Visualize the Decision Tree
+import numpy as np
+
+import pandas as pd
+
+import matplotlib.pyplot as plt
+
+from sklearn.model_selection import train_test_split
+
+from sklearn import datasets
+
+from sklearn.tree import DecisionTreeRegressor
+
+from sklearn.metrics import mean_squared_error
+# from google.colab import drive
+
+# drive.mount('/content/drive', readonly=True)
+url = "https://ddc-datascience.s3.amazonaws.com/boston.csv"
+
+boston = pd.read_csv( url, index_col = 0 )
+
+boston.head()
+
+boston.shape
+
+boston.info()
+
+boston.describe().transpose()
+
+boston.isnull().sum()*100
+
+X = boston.drop('med_home_value', axis = 1)
+
+y = boston['med_home_value']
+numLoops = 500
+
+
+
+rms_error = np.zeros(numLoops)
+
+
+
+for idx in range(0,numLoops):
+
+  X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2)
+
+  model = DecisionTreeRegressor(max_depth=3)         # Arbitrarily choosing max_depth of 3
+
+  model.fit(X_train,y_train)
+
+  y_pred = model.predict(X_test)
+
+  rms_error[idx] = np.sqrt(mean_squared_error(y_test, y_pred))
+
+
+
+print(f"CV RMSE: {rms_error.mean().round(2)*1000}")
+max_depths = [1,2,3,4,5,6,7,8,9,10]
+
+rms_depth = np.zeros(len(max_depths))
+
+std_depth = np.zeros(len(max_depths))
+
+
+
+numLoops = 500
+
+
+
+for n, depth in enumerate(max_depths):
+
+  rms_error = np.zeros(numLoops)
+
+
+
+  for idx in range(0,numLoops):
+
+    X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2)
+
+    model = DecisionTreeRegressor(max_depth=depth)
+
+    model.fit(X_train,y_train)
+
+    y_pred = model.predict(X_test)
+
+    rms_error[idx] = np.sqrt(mean_squared_error(y_test, y_pred))
+
+
+
+  rms_depth[n] = rms_error.mean()
+
+  std_depth[n] = rms_error.std( ddof = 1 )
+
+pd.DataFrame( zip( max_depths, rms_depth, std_depth ) )
+
+# Plot result
+
+plt.figure(figsize = (8,5))
+
+plt.plot(max_depths, rms_depth)
+
+plt.xlabel('Max Depth')
+
+plt.ylabel('RMSE')
+
+plt.xlim(0, 10.5)
+
+plt.grid()
+# Re run with max depth = 4
+
+numLoops = 500
+
+
+
+rms_error = np.zeros( numLoops )
+
+
+
+for idx in range( 0, numLoops ):
+
+  X_train, X_test, y_train, y_test = train_test_split( X, y, test_size=0.2 )
+
+  model = DecisionTreeRegressor( max_depth=4 )
+
+  model.fit( X_train, y_train )
+
+  y_pred = model.predict( X_test )
+
+  rms_error[idx] = np.sqrt( mean_squared_error( y_test, y_pred ) )
+
+
+
+print(f"CV RMSE: {rms_error.mean().round(2)*1000}")
+import graphviz
+
+from IPython.display import display
+
+from sklearn import tree
+# Option 1
+
+display(
+
+  graphviz.Source(
+
+    tree.export_graphviz(
+
+      model,
+
+      feature_names = X.columns,
+
+      filled = True,
+
+    )
+
+  )
+
+)
+# Option 2
+
+plt.figure(figsize=(30,15))
+
+tree_plot = tree.plot_tree(
+
+  model,
+
+  feature_names = X.columns,
+
+  filled=True,
+
+)

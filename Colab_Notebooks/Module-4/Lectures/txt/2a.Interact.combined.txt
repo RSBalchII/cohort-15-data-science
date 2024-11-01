@@ -1,0 +1,166 @@
+Inspired by https://blog.ouseful.info/2017/01/10/an-alternative-way-of-motivating-the-use-of-functions/
+Let's build this up slowly.  First, here's code to just make a simple sine plot.
+We can just copy and paste our code to see what happens if we change it to be sin(2*x) instead of sin(x).
+But it might make more sense to make a function that takes the frequency as an argument if we want to play around with different values here.
+Now we can just rerun our function with different inputs to see what happens.
+Or we can make it way cooler using interact.  This way we can just use a slider to change the value of f on the fly.
+If we want to play more with interact we can just bring up the help and get some ideas of what we can do.
+Let's try out a few of the examples from the help documentation.
+This uses interact as a decorator instead.  `@interact` goes on top of the function instead of using `interact(func)`.
+We can also use a list with interact to limit our input options and create a dropdown that lets us pick options from the list.
+Here's an example that uses a boolean input and creates a checkbox.
+# Your Turn
+
+1. Create a function called `plot_power` that takes in two arguments:  `x_max` and `power`. This function should do the following:
+
+* Create a variable called `x` which consists of 30 equally spaced points between `-x_max` and `x_max`. (Note: `x_max` can be any positive integer)
+
+* Create a variable called `y` which is equal to $x^{power}$ (where `power` is the value specified by the user).
+
+* Plot y versus x.  
+
+
+
+2. Use interact to create sliders with a range of values for `x_max` and `power`.
+import matplotlib.pyplot as plt
+
+import numpy as np
+
+# create 1000 evenly spaced points
+
+x = np.linspace(0, 2*np.pi, 1000)
+
+y = np.sin(x)
+
+
+
+plt.plot(x,y) ;
+# create 1000 evenly spaced points
+
+x = np.linspace(0, 2*np.pi, 1000)
+
+y = np.sin(2*x)
+
+
+
+plt.plot(x,y) ;
+def sinplot(f=1):
+
+  x = np.linspace(0, 2*np.pi, 1000)
+
+  y = np.sin(f*x)
+
+  plt.plot(x,y)
+
+  plt.show() ;
+sinplot()
+sinplot(5)
+from ipywidgets import interact
+
+interact(sinplot, f=(0,10)) ;
+interact?
+def greeting(text="World"):
+
+  print("Hello {}".format(text))
+
+
+
+interact(greeting) ;
+def greeting(text="World!"):
+
+  print("Hello {}".format(text))
+
+
+
+interact(greeting, text="universe") ;
+
+def greeting(greet="hello", text="World"):
+
+  print("{} -- {}".format(greet, text))
+
+
+
+interact(greeting, text="universe") ;
+
+# interact(greeting, greet="Hola") ;
+@interact
+
+def greeting(text="World!"):
+
+  print("Hello {}".format(text))
+@interact(text="universe")
+
+def greeting(text="World!"):
+
+  print("Hello {}".format(text))
+@interact(greet="Hola")
+
+def greeting(greet="hello", text="World"):
+
+  print("{} -- {}".format(greet, text))
+
+@interact(text = ["universe", "little bear","World!"])
+
+def greeting(text="World!"):
+
+  print("Hello {}".format(text))
+@interact
+
+def lin_log(log=False):
+
+  x = np.linspace(0.1, 100, 1000)
+
+  y = x
+
+  if log: plt.axes(yscale='log')
+
+  plt.plot(x,y)
+
+  plt.show()
+@interact(a=(-100,100), b=(-100, 100), c=(-100,100))
+
+def multiply(a=1,b=-1,c=1, pos= False):
+
+  if pos: return abs(a*b*c)
+
+  return(a*b*c)
+# Solution
+
+def plot_power( x_max = 0, power = 1 ):
+
+  '''
+
+  Plots x^power versus x.
+
+  '''
+
+  x = np.linspace( -x_max, x_max, 30 )
+
+  y = x**power
+
+  plt.plot( x, y )
+
+  plt.show()
+plot_power
+plot_power( 10, 2 )
+interact( plot_power, x_max = ( -5, 11 ), power = [ 1, 5] ) ;
+
+# Solution
+
+@interact( x_max = ( -5, 11 ), power = [ 1, 5] )
+
+def plot_power( x_max = 0, power = 1 ):
+
+  '''
+
+  Plots x^power versus x.
+
+  '''
+
+  x = np.linspace( -x_max, x_max, 30 )
+
+  y = x**power
+
+  plt.plot( x, y )
+
+  plt.show()

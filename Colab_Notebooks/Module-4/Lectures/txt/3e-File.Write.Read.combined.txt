@@ -1,0 +1,154 @@
+# Writing to a File
+## Using the Shell
+Using echo and the shell's redirect operator.
+Using a "here document" structure.
+## Using writefile Magic
+The `%%writefile` magic takes all the text after the magic and writes it to the specified file.
+## Using Python
+The most "Pythonic" way to write to a file is to use a "context manager".  The `with` command creates a code block that automatically handles, i.e. provides a context for, closing a file.
+Another way to to use the pair `open` and `close`.  This is generally avoided as it is easy to forget to include the `close`.
+# Reading from a File
+## Using the Shell
+The most common way to read from a file is to use `cat` and assign it to a Python variable.  Each line becomes an entry in a list.
+## Using capture Magic
+The `%%capture` magic reads all the output of a cell.  If a variable is given, the output is assigned to the variable.  Both the standard output and standard error are captured and can be accessed using the `#.stdout` and `#.stderr` attributes.  They are both strings.
+
+## Using Python
+Just the like writing, the most "Pythonic" way to read from a file is to use a "context manager".
+You can also read one line at a time using a loop.
+# Your turn
+## Part 1
+
+Write some content to files using each of the three methods shown above
+
+- shell
+
+- %%writefile
+
+- Python open()
+
+
+
+## Part 2
+
+Then use each of the three methods shown above to read the content into a Python variable.
+
+- shell
+
+- %%capture
+
+- Python open()
+---
+!echo hello world > hello.world.v01.txt
+
+ls -la hello.world.v01.txt
+
+!cat -n hello.world.v01.txt
+
+%%bash
+
+cat <<'asdfasdfasdf' > hello.world.v02.txt
+
+  hello
+
+  world
+
+asdfasdfasdf
+
+!cat -n hello.world.v02.txt
+
+%%writefile hello.world.v03.txt
+
+hello
+
+world
+
+!cat -n hello.world.v03.txt
+
+with open("hello.world.v04.txt", "w") as file:
+
+  file.write("hello world")
+
+!cat -n hello.world.v04.txt
+ls -la hello*
+file = open("hello.world.v05.txt", "w")
+
+file.write("hello world\n")
+
+file.close()
+!cat -n hello.world.v05.txt
+ls -la hello*
+!cat -n hello.world.v01.txt
+output = !cat -n hello.world.v01.txt
+
+print(output)
+
+output[0].upper()
+%%capture output
+
+!cat -n hello.world.v02.txt
+print(output.stdout)
+print(output.stderr)
+output = ''
+
+with open("hello.world.v04.txt", "r") as file:
+
+  output = file.read()
+
+
+
+print(output)
+type(output)
+type(output.split('\n'))
+output.split('\n')
+!seq 1 10 > hello.world.v04.txt
+!cat -n hello.world.v04.txt
+output = ''
+
+with open("hello.world.v04.txt", "r") as file:
+
+  for line in file:
+
+    output += line
+
+
+
+print(output)
+output
+output = []
+
+with open("hello.world.v04.txt", "r") as file:
+
+  for line in file:
+
+    output += [line.rstrip()]
+
+
+
+print(output)
+# Solution
+
+# Solution
+
+!cat --help
+!cat -b hello.world.v01.txt
+%%writefile foobar.txt
+
+hello
+
+
+
+
+
+
+
+
+
+
+
+world
+
+!cat -n foobar.txt
+!cat -b foobar.txt
+!cat -ns foobar.txt
+!cat -vet foobar.txt

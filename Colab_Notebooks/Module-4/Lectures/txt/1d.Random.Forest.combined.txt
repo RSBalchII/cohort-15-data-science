@@ -1,0 +1,194 @@
+## Decision Tree Regression
+#Random Forest
+## How do you choose number of trees?
+## Find Important Predictors
+import numpy as np
+
+import pandas as pd
+
+import matplotlib.pyplot as plt
+
+from sklearn.model_selection import train_test_split
+
+from sklearn import datasets
+
+from sklearn.tree import DecisionTreeRegressor
+
+from sklearn.ensemble import RandomForestRegressor
+
+from sklearn.metrics import mean_squared_error
+
+from sklearn import metrics
+
+import pickle
+# from google.colab import drive
+
+# drive.mount('/content/drive', readonly=True)
+url = "https://ddc-datascience.s3.amazonaws.com/boston.csv"
+
+boston = pd.read_csv( url, index_col = 0 )
+
+boston.head()
+boston.info()
+X = boston.drop('med_home_value', axis = 1)
+
+y = boston['med_home_value']
+numLoops = 500
+
+
+
+mean_error = np.zeros(numLoops)
+
+
+
+# np.random.seed(42)
+
+for idx in range(0,numLoops):
+
+  X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2)
+
+  model = DecisionTreeRegressor(max_depth=5, random_state=0)
+
+  model.fit(X_train,y_train)
+
+  y_pred = model.predict(X_test)
+
+  mean_error[idx] = mean_squared_error(y_test, y_pred)
+
+
+
+print(f'RMSE: {np.sqrt(mean_error).mean()*1000}')
+
+print(f'RMSE_std: {np.sqrt(mean_error).std()*1000}')
+
+# two parameters - n_estimators (number of trees), max_depth (number of splits)
+
+numLoops = 500
+
+
+
+mean_error = np.zeros(numLoops)
+
+
+
+# np.random.seed(42)
+
+for idx in range(0,numLoops):
+
+  X_train, X_test, y_train, y_test = train_test_split( X, y, test_size = 0.2 )
+
+  model = RandomForestRegressor( n_estimators = 10 ) #n_estimators is number of trees in forest. Note: you can also choose max_depth for RFs
+
+  model.fit( X_train, y_train )
+
+  y_pred = model.predict( X_test )
+
+  mean_error[idx] = mean_squared_error( y_test, y_pred )
+
+
+
+print(f'RMSE: {np.sqrt(mean_error).mean()*1000}')
+
+print(f'RMSE_std: {np.sqrt(mean_error).std()*1000}')
+
+np.sqrt(mean_error)[:50]
+
+num_trees = range(10,60,10)
+
+cv_loops = 100
+
+rmse_results = np.zeros(len(num_trees))
+
+std_results = np.zeros(len(num_trees))
+
+
+
+for n, trees in enumerate(num_trees):
+
+  rmse_cv = np.zeros(cv_loops)
+
+  np.random.seed(42)
+
+  for i in range(cv_loops):
+
+    X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.20)
+
+    rfModel = RandomForestRegressor( n_estimators=trees )
+
+    rfModel.fit(X_train, y_train)
+
+    y_pred_rf = rfModel.predict(X_test)
+
+    rmse_cv[i] = np.sqrt(mean_squared_error(y_test, y_pred_rf))
+
+
+
+  print(trees,' trees finished.')
+
+  rmse_results[n] = rmse_cv.mean()
+
+  std_results[n] = rmse_cv.std()
+
+pickle.dump(rfModel, open('rfModel.p','wb'))
+
+plt.plot(num_trees, rmse_results)
+
+plt.xlabel('Tree No.')
+
+plt.ylabel('RMSE')
+
+plt.grid()
+pd.DataFrame( zip( rmse_results, std_results, ) )
+# plt.errorbar(num_trees, rmse_results, yerr=(std_results*2,std_results*2))
+
+plt.errorbar(num_trees, rmse_results, yerr=std_results)
+
+plt.xlabel('Tree No.')
+
+plt.ylabel('RMSE')
+
+plt.ylim(0,5)
+
+plt.xlim(0,55)
+
+plt.grid()
+print(f'RMSE with 30 trees: {rmse_results[2]*1000}')
+import graphviz
+
+from IPython.display import display
+
+from sklearn import tree
+len(rfModel.estimators_)
+# Display one tree from the random forest
+
+display(
+
+  graphviz.Source(
+
+    tree.export_graphviz(
+
+      rfModel.estimators_[0],
+
+      feature_names = X.columns,
+
+    )
+
+  )
+
+)
+importances = rfModel.feature_importances_
+
+forest_importances = pd.Series( importances, index = X.columns )
+
+
+
+plt.figure()
+
+# forest_importances.plot.bar()
+
+forest_importances.sort_values( ascending = False ).plot.bar()
+
+plt.title("Feature importances")
+
+plt.ylabel('Feature Importance Score') ;
+( forest_importances.sort_values( ascending = False ) * 100 ).cumsum()

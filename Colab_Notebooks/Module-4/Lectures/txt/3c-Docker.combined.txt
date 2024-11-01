@@ -1,0 +1,88 @@
+# Docker
+
+
+
+See [Gentle Intro to Docker]( https://rwcitek.github.io/docker/slides/DockerGentleIntro/#/1 )
+## Build
+
+
+
+1. Start CodeSpaces from [this repo]( https://github.com/rwcitek/bash.scripting.codespaces )
+
+1. Login to Docker Hub using [these instructions]( https://github.com/rwcitek/bash.scripting.codespaces/blob/main/docker.1-setup.ipynb )
+
+1. Build the image using [these instructions]( https://github.com/rwcitek/bash.scripting.codespaces/blob/main/docker.2-intro.ipynb )
+## Your own webserver
+
+1. Start CodeSpaces from [this repo]( https://github.com/rwcitek/bash.scripting.codespaces )
+
+1. Start Apache using this command
+
+```bash
+
+docker container run -d --name apache -p 8080:80 ubuntu/apache2
+
+```
+
+1. View the webserver by clicking on this URL: http://localhost:8080
+
+
+
+1. Create a web page
+
+```bash
+
+cat <<'eof' > hw.html
+
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+
+    <title>This is a title</title>
+
+  </head>
+
+  <body>
+
+    <div>
+
+        <p>Hello world!</p>
+
+    </div>
+
+  </body>
+
+</html>
+
+eof
+
+```
+
+1. Copy html page into docker container
+
+```bash
+
+docker cp hw.html apache:/var/www/html/
+
+```
+
+
+
+1. View new webpage
+
+- http://localhost:8080/hw.html
+
+
+
+1. View apache logs
+
+```bash
+
+docker container logs apache
+
+```
+
+
+

@@ -1,0 +1,314 @@
+## Local vs. Cloud
+**Local**
+
+*   Control
+
+*   Customization
+
+*   Git - Version Control
+
+*   More files open
+
+*   Persistent storage - no weird workarounds with connecting Google Drive
+
+
+
+
+
+**Colab**
+
+*   Easy to get started on
+
+*   Preinstalled packages - could be good or bad
+
+*   Google Drive integration
+
+*   No installation needed
+
+*   Consistent no matter what your OS is
+
+*   Google's computing power
+
+
+
+
+
+**Other cloud options**
+
+* There are other options for running in the cloud
+
+* Alternatives similar to Colab
+
+* Configure your own cloud-computing environment
+
+* Docker containers
+
+
+
+
+
+## Local Package management
+### General Ideas
+
+- Create environments to install Python packages
+
+  - Install only packages needed for a specific project
+
+  - Control versions of packages (may need different versions for different projects)
+
+  - Share project requirements with others
+
+
+
+- General process
+
+  - Setup:
+
+   - Create a new environment
+
+   - Activate the environment for your project
+
+   - Install packages
+
+
+
+  - Use
+
+    - Activate environment
+
+    - Code cool things
+
+    - Deactivate
+
+  
+
+  - Share
+
+    - Make a requirements file
+
+    - Make an environment from a requirements file
+
+    
+
+  **Package management options**
+
+  - conda/Anaconda
+
+  - pip, venv, pipenv
+[Conda vs. pip vs. virtualenv commands](https://docs.conda.io/projects/conda/en/latest/commands.html#conda-vs-pip-vs-virtualenv-commands)
+## Conda - Anaconda
+
+**conda** is a package manager  
+
+**Anaconda** is an installation that includes:   
+
+- conda
+
+- many other packages commonly used for Data Science
+
+- A GUI interface  
+### Anaconda Navigator - GUI
+- [Download and Install](https://docs.anaconda.com/anaconda/install/)  
+
+- Windows and Mac: launch Anaconda Navigator
+
+- Linux- from command line: `conda activate` then `anaconda-navigator`
+
+- Selecting 'Environments' from menu on left lets you create & manage environments
+
+- From 'Home' you can pick an environment and then launch Jupyter Lab, or another program.
+
+### Conda - command line
+
+
+
+
+
+*  [Install](https://docs.conda.io/en/latest/miniconda.html)
+
+* [Documentation](https://docs.conda.io/en/latest/)
+
+
+
+#### Create and setup new environment
+
+
+
+
+
+`conda create --name $ENVIRONMENT_NAME python`  
+
+
+
+`conda activate $ENVIRONMENT_NAME`
+
+
+
+`conda install $PACKAGE_NAME`
+
+
+
+`conda deactivate`
+
+
+
+#### Use a Conda environment
+
+
+
+`conda activate $ENVIRONMENT_NAME`
+
+
+
+Do your work (for example run jupyter lab and work on a notebook)
+
+
+
+`jupyter lab`
+
+
+
+`conda deactivate`
+
+
+
+#### Export/Reuse environment
+
+
+
+[Sharing a Conda Environment Documentation](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#sharing-an-environment)
+
+
+
+
+
+Activate environment
+
+
+
+`conda activate $ENVIRONMENT_NAME`
+
+
+
+Export requirements:
+
+
+
+`conda env export > environment.yml`
+
+
+
+Create new environment using requirements
+
+
+
+`conda create --name $NEW_ENVIRONMENT_NAME --file environment.yml`
+
+## Python venv
+
+### Initial setup
+If using Debian or Debian derivative ...
+
+
+
+```bash
+
+export DEBIAN_FRONTEND=noninteractive
+
+sudo apt-get update
+
+sudo apt-get install -y python3-pip python3-venv tree
+
+```
+
+```bash
+
+cd path/to/your/projects
+
+
+
+python3 -m venv project_name
+
+```
+```bash
+
+tree -L 2 project_name/
+
+```
+
+### Activate venv
+
+In your projects folder ...
+
+
+
+```bash
+
+source project_name/bin/activate
+
+```
+### Installing Packages
+
+
+
+While the virtual environment is active, you can install packages using pip and pip will install packages within the folder hierarchy specific to the virtual environment.
+
+
+
+```bash
+
+pip install package_name
+
+```
+### Listing installed python packages
+
+
+
+
+
+```bash
+
+pip freeze | tee requirements.txt
+
+```
+
+
+
+
+
+### Installing packages from a requirements.txt file
+
+
+
+```bash
+
+pip install -r requirements.txt
+
+```
+
+
+
+### Deactivating the Virtual Environment
+
+
+
+```bash
+
+deactivate
+
+```
+
+
+
+## References
+
+
+
+- Corey Schafer -- [Python Tutorial: VENV (Windows) - How to Use Virtual Environments with the Built-In venv Module]( https://youtu.be/APOPm01BVrk )
+
+
+
+
+
+
+

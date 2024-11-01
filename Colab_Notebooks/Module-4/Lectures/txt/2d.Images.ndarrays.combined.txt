@@ -1,0 +1,444 @@
+# Image Representation of ndarrays
+Modify plotting layout for images, i.e. put xtick/xlabels at the top of the image.
+## Display a numpy array of 0's and 1's.
+## Using reshape
+
+
+
+Go from 1-D to 2-D using the `reshape()` method.
+## Using list repetition.
+## Using `logical_not()` to invert an array
+
+## Using `append()` to combine arrays
+
+## Using modulo
+## Create a diagonal line
+## Keep lower triangle
+`tril()` keeps the lower triangle and fills the upper triangle with zeros.  By default, the diagonal is not included.  To include the diagonal, add the option `-1`.
+## Keep upper triangle
+`triu()` keeps the upper triangle and fills the lower triangle with zeros.  By default, the diagonal is not included.  To include the diagonal, add the option `-1`.
+## Keep the diagonal: `triu()` with `tril()`
+The result is equivalent to using `fill_diagonal()`
+## Checkerboard
+## Black and White numbers
+
+
+
+Black is always the minimum in the set of numbers.
+
+
+
+White can be any positive number that is the maximum in the set of numbers.
+Notice how we use numpy's universal function feature to muliply all values in an array by a single value.
+## Greyscale
+
+
+
+Not everything has to be black and white.
+Very fine grey scales.
+import numpy as np
+
+import matplotlib.pyplot as plt
+
+import matplotlib
+
+%config InlineBackend.figure_formats = 'retina'
+
+matplotlib.rcParams.update( {
+
+    "xtick.top" : True,
+
+    "xtick.labeltop" : True,
+
+    "xtick.bottom": False,
+
+    "xtick.labelbottom": False,
+
+}
+
+)
+shades = np.array( [ 0, 1, 0, 1, 0, 1, 0, 1, 0, ] )
+
+
+
+print(list(shades))
+
+print(shades.shape)
+
+print()
+
+
+
+# Convert from 1-D array to 2-D matrix
+
+img = np.array( [
+
+    shades,
+
+] )
+
+
+
+print(img)
+
+print(img.shape)
+
+print()
+
+
+
+plt.imshow(img, cmap='gray') ;
+shades = np.array( [ 0, 1, 0, 1, 0, 1, 0, 1, 0, ] )
+
+
+
+print(list(shades))
+
+print(shades.shape)
+
+print()
+
+
+
+# reshape into rows, columns ( -1 == whatever it takes to work )
+
+img = shades.reshape(1,-1)
+
+print(img)
+
+print(img.shape)
+
+print()
+
+
+
+plt.imshow(img, cmap='gray') ;
+# reshape into rows, columns ( -1 == whatever it takes to work )
+
+img = shades.reshape(3,-1)
+
+print(img)
+
+print(img.shape)
+
+print()
+
+
+
+plt.imshow(img, cmap='gray') ;
+# repeating list [0, 1] using '*' list operator
+
+shades = np.array( [ 0, 1, ] * 4 + [0] )
+
+
+
+print(list(shades))
+
+print(shades.shape)
+
+print()
+
+
+
+# reshape into rows, columns ( -1 == whatever it takes to work )
+
+img = shades.reshape(3,-1)
+
+print(img)
+
+print(img.shape)
+
+print()
+
+
+
+plt.imshow(img, cmap='gray') ;
+# repeating list [0, 1] using np.tile()
+
+shades = np.tile( [ 0, 1, ], 5 ).flatten()[:9]
+
+
+
+print(list(shades))
+
+print(shades.shape)
+
+print()
+
+
+
+# reshape into rows, columns ( -1 == whatever it takes to work )
+
+img = shades.reshape( 3, -1 )
+
+print(img)
+
+print(img.shape)
+
+print()
+
+
+
+plt.imshow(img, cmap='gray') ;
+shades = np.array( ( [ 0, 1, ] * 4 + [0] ) )
+
+
+
+print(shades)
+
+print(shades.shape)
+
+print()
+
+
+
+# reshape into rows, columns ( -1 == whatever it takes to work )
+
+img = np.logical_not( shades ).reshape(3,-1)
+
+print(img + 0 )
+
+print(img.shape)
+
+print()
+
+
+
+plt.imshow(img, cmap='gray') ;
+shades = np.array( ( [ 0, 1, ] * 4 + [0] ) )
+
+
+
+print(list(shades))
+
+print(list(np.logical_not( shades ) + 0 ))
+
+print(shades.shape)
+
+print()
+
+
+
+# reshape into rows, columns ( -1 == whatever it takes to work )
+
+img = np.append( shades, np.logical_not( shades )).reshape(2,-1)
+
+print(img)
+
+print(img.shape)
+
+print()
+
+
+
+plt.imshow(img, cmap='gray') ;
+# Since the 0's and 1's alternate, this can be accomplished with a modulo ( i.e. remainder ) operator
+
+shades = np.arange(18) % 2
+
+
+
+print(list(shades))
+
+print(shades.shape)
+
+print()
+
+
+
+# reshape into rows, columns ( -1 == whatever it takes to work )
+
+img = shades.reshape(2,-1)
+
+print(img)
+
+print(img.shape)
+
+print()
+
+
+
+plt.imshow(img, cmap='gray') ;
+img = np.zeros((10, 10))
+
+np.fill_diagonal(img, 1)
+
+
+
+print(img)
+
+print(img.shape)
+
+print()
+
+
+
+plt.imshow(img, cmap='gray') ;
+img = np.ones((10, 10))
+
+img = np.tril(img,)
+
+
+
+print(img)
+
+print(img.shape)
+
+print()
+
+
+
+plt.imshow(img, cmap='gray') ;
+img = np.ones((10, 10))
+
+img = np.triu(img)
+
+
+
+print(img)
+
+print(img.shape)
+
+print()
+
+
+
+plt.imshow(img, cmap='gray') ;
+img = np.ones((10, 10))
+
+img = np.triu(img)
+
+img = np.tril(img)
+
+
+
+print(img)
+
+print(img.shape)
+
+print()
+
+
+
+plt.imshow(img, cmap='gray') ;
+shape = (8, 8)
+
+indices =  np.indices(shape)
+
+print("== Indices: \n", indices)
+
+print(indices.shape)
+
+print()
+
+
+
+sum_of_i = indices.sum( axis = 0 )
+
+print("== Sum of the indices: \n", sum_of_i)
+
+print(sum_of_i.shape)
+
+print()
+
+
+
+checkerboard = sum_of_i % 2
+
+img = checkerboard
+
+print("== Checkerboard: \n", img)
+
+print(img.shape)
+
+print()
+
+
+
+plt.imshow(img, cmap='gray') ;
+# The frequencies of sums of rolling two dies.
+
+print(np.asarray(np.unique(sum_of_i[1:7,1:7], return_counts=True)).transpose())
+
+shades = np.array( [ 0, 1, 0, 1, 0, 1, 0, 1, 0, ] )
+
+
+
+print(list(shades))
+
+print(shades.shape)
+
+print()
+
+# multiply each value in matrix by a single value ( i.e. a scalar )
+
+shades = (shades * 3.14) + 4
+
+
+
+print(list(shades))
+
+print(shades.shape)
+
+print()
+
+# convert from 1-D to 2-D
+
+img = shades.reshape(1, -1)
+
+
+
+print(img)
+
+print(img.shape)
+
+print()
+
+
+
+plt.imshow(img, cmap='gray') ;
+# Using modulo to generate numbers in addition to 0, 1.
+
+n = 12
+
+m = 4
+
+shades = np.arange( n ) % m
+
+shades = ( shades / (m-1) ) * 255
+
+
+
+print(list(shades))
+
+print(shades.shape)
+
+print()
+
+
+
+# reshape into rows, columns ( -1 == whatever it takes to work )
+
+img = shades.reshape(1,-1)
+
+print(list(img))
+
+print(img.shape)
+
+print()
+
+
+
+plt.imshow(img, cmap='gray') ;
+fig, sps = plt.subplots( 6, 1, figsize=(10,10))
+
+
+
+for i, sp in enumerate(sps.flatten()):
+
+  img = np.linspace( 0, 255, 2**(i+1) ).reshape(1,-1)
+
+  sp.axis(False)
+
+  sp.imshow(img, cmap='gray', aspect='auto')
+
