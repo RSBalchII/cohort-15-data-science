@@ -46,6 +46,11 @@ RUN apt-get update && apt-get install -y \
     libxcb-util1 \
     libxcb-xkb1 \
     libffi-dev \
+    pandoc \
+    texlive-xetex \
+    texlive-fonts-recommended \
+    texlive-full \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Upgrade pip and install wheel
