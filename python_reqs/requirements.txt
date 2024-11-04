@@ -36,3 +36,4 @@ jupyter-sql
 js2py
 regex
 soundfile
+xgboost 
