@@ -1,0 +1,4416 @@
+Project_4:Music_Popularity_Prediction
+November 5, 2024
+
+1
+
+Project 4: Music Popularity Prediction
+
+By: Robert S Balch
+
+1.1
+
+Hypothesis:
+
+The popularity of a song on Spotify’s Top 200 Weekly (Global) charts in 2020 & 2021 is likely
+influenced by a combination of audio features, artist popularity, and chart performance metrics.
+Specifically:
+1. Audio Features:
+• Loudness and Energy are likely to be strong predictors of popularity, as more energetic
+and louder songs tend to perform better on charts.
+• Danceability and Valence (positiveness) may also be important, as upbeat and positive
+songs often appeal to a wider audience.
+• Tempo could be a factor, with faster-paced songs potentially being more popular in
+certain genres.
+2. Artist Popularity:
+• The number of artist followers is likely to be a significant predictor, as more popular
+artists tend to have more popular songs.
+3. Chart Performance Metrics:
+• Highest Charting Position and Number of Times Charted are likely to be strong indicators of overall popularity.
+4. Genre:
+• Certain genres (e.g., pop, hip-hop) may be more represented in the top charts, potentially
+influencing popularity.
+5. Song Characteristics:
+• Duration might play a role, with shorter songs potentially being more popular in recent
+years.
+6. Release Timing:
+• The release date of the song could influence its popularity, with songs released earlier in
+the year potentially having more time to accumulate popularity.
+7. Feature Interactions:
+• The interaction between audio features and artist popularity could be important. For
+example, a highly energetic song by a popular artist might be more likely to be popular
+than a similar song by a less known artist.
+8. Cultural and Temporal Factors:
+• The dataset spans 2020 & 2021, which includes the COVID-19 pandemic period. This
+might have influenced listening habits and song popularity.
+1
+
+The data. A chosen data set is provided by DDC Data Science
+
+2
+
+Imports
+
+[210]: import sys
+print(sys.executable)
+/usr/local/bin/python
+[211]: import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
+import seaborn as sns
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor
+import xgboost as xgb
+from sklearn.metrics import mean_squared_error, root_mean_squared_error,r2_score
+[212]: import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+#n_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor
+import xgboost as xgb
+from sklearn.metrics import mean_squared_error, root_mean_squared_error,r2_score
+[213]: %%capture
+url = "https://ddc-datascience.s3.amazonaws.com/Projects/Project.4-Spotify/Data/
+↪Spotify.csv"
+!curl -s -I {url}
+
+2
+
+3
+
+Data Exploration
+
+[214]: df_1 = pd.read_csv(url).copy()
+
+3.1
+
+Head
+
+[215]: df_1.head()
+[215]:
+0
+1
+2
+3
+4
+
+Index
+1
+2
+3
+4
+5
+
+Highest Charting Position
+1
+2
+1
+3
+5
+
+Number of Times Charted
+8
+3
+11
+5
+1
+
+0
+1
+2
+3
+4
+
+Week of Highest Charting
+2021-07-23--2021-07-30
+2021-07-23--2021-07-30
+2021-06-25--2021-07-02
+2021-07-02--2021-07-09
+2021-07-23--2021-07-30
+
+0
+1
+2
+3
+4
+
+Artist Artist Followers
+Måneskin
+3377762
+The Kid LAROI
+2230022
+Olivia Rodrigo
+6266514
+Ed Sheeran
+83293380
+Lil Nas X
+5473565
+
+0
+1
+2
+3
+4
+
+Genre
+['indie rock italiano', 'italian pop']
+['australian hip hop']
+['pop']
+['pop', 'uk pop']
+['lgbtq+ hip hop', 'pop rap']
+
+0
+1
+2
+3
+4
+
+Speechiness Acousticness Liveness
+0.0504
+0.127
+0.359
+0.0483
+0.0383
+0.103
+0.154
+0.335
+0.0849
+0.0348
+0.0469
+0.364
+0.0615
+0.0203
+0.0501
+
+Song Name
+Beggin'
+STAY (with Justin Bieber)
+good 4 u
+Bad Habits
+INDUSTRY BABY (feat. Jack Harlow)
+
+\
+
+Streams
+48,633,449
+47,248,719
+40,162,559
+37,799,456
+33,948,454
+
+\
+
+… Danceability Energy Loudness
+…
+0.714
+0.8
+-4.808
+…
+0.591 0.764
+-5.484
+…
+0.563 0.664
+-5.044
+…
+0.808 0.897
+-3.712
+…
+0.736 0.704
+-7.409
+
+\
+
+Song ID
+3Wrjm47oTz2sjIgck11l5e
+5HCyWlXZPP0y6Gqq8TgA20
+4ZtFanR9U6ndgddUvNcjcG
+6PQ88X9TkUIAUIZJHW2upE
+27NovPIUIRrOZoCHxABJwK
+
+\
+
+Tempo Duration (ms) Valence
+134.002
+211560
+0.589
+169.928
+141806
+0.478
+166.928
+178147
+0.688
+126.026
+231041
+0.591
+149.995
+212000
+0.894
+
+[5 rows x 23 columns]
+
+3
+
+Chord
+B
+C#/Db
+A
+B
+D#/Eb
+
+3.2
+
+Tail
+
+3.3
+
+Shape
+
+[216]: df_1.shape
+[216]: (1556, 23)
+
+3.4
+
+columns
+
+[217]: df_1.columns
+[217]: Index(['Index', 'Highest Charting Position', 'Number of Times Charted',
+'Week of Highest Charting', 'Song Name', 'Streams', 'Artist',
+'Artist Followers', 'Song ID', 'Genre', 'Release Date', 'Weeks Charted',
+'Popularity', 'Danceability', 'Energy', 'Loudness', 'Speechiness',
+'Acousticness', 'Liveness', 'Tempo', 'Duration (ms)', 'Valence',
+'Chord'],
+dtype='object')
+
+3.5
+
+Dtypes
+
+[218]: df_1.dtypes
+[218]: Index
+Highest Charting Position
+Number of Times Charted
+Week of Highest Charting
+Song Name
+Streams
+Artist
+Artist Followers
+Song ID
+Genre
+Release Date
+Weeks Charted
+Popularity
+Danceability
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+Chord
+dtype: object
+
+int64
+int64
+int64
+object
+object
+object
+object
+object
+object
+object
+object
+object
+object
+object
+object
+object
+object
+object
+object
+object
+object
+object
+object
+
+4
+
+3.6
+
+Describe
+
+[219]: df_1.describe()
+[219]:
+count
+mean
+std
+min
+25%
+50%
+75%
+max
+
+3.7
+
+Index
+1556.000000
+778.500000
+449.322824
+1.000000
+389.750000
+778.500000
+1167.250000
+1556.000000
+
+Highest Charting Position
+1556.000000
+87.744216
+58.147225
+1.000000
+37.000000
+80.000000
+137.000000
+200.000000
+
+Isnull Sum
+
+[220]: df_1.isnull().sum()
+[220]: Index
+Highest Charting Position
+Number of Times Charted
+Week of Highest Charting
+Song Name
+Streams
+Artist
+Artist Followers
+Song ID
+Genre
+Release Date
+Weeks Charted
+Popularity
+Danceability
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+Chord
+dtype: int64
+
+3.8
+
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+Isna Sum
+
+[221]: df_1.isna().sum()
+
+5
+
+Number of Times Charted
+1556.000000
+10.668380
+16.360546
+1.000000
+1.000000
+4.000000
+12.000000
+142.000000
+
+[221]: Index
+Highest Charting Position
+Number of Times Charted
+Week of Highest Charting
+Song Name
+Streams
+Artist
+Artist Followers
+Song ID
+Genre
+Release Date
+Weeks Charted
+Popularity
+Danceability
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+Chord
+dtype: int64
+
+3.9
+
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+unique values
+
+[222]: df_1.count('rows').unique().sum()
+[222]: np.int64(1556)
+[223]: df_1.count('columns')
+[223]: 0
+1
+2
+3
+4
+
+23
+23
+23
+23
+23
+..
+1551
+23
+1552
+23
+1553
+23
+1554
+23
+1555
+23
+Length: 1556, dtype: int64
+
+6
+
+3.10
+
+Sort_values
+
+[224]: df_1.sort_values(by = ['Popularity'], ascending = False).head(10)
+[224]:
+1
+2
+3
+5
+4
+8
+14
+7
+9
+11
+
+Index
+2
+3
+4
+6
+5
+9
+15
+8
+10
+12
+
+1
+2
+3
+5
+4
+8
+14
+7
+9
+11
+
+Week of Highest Charting
+2021-07-23--2021-07-30
+2021-06-25--2021-07-02
+2021-07-02--2021-07-09
+2021-05-07--2021-05-14
+2021-07-23--2021-07-30
+2021-06-18--2021-06-25
+2021-05-21--2021-05-28
+2021-06-18--2021-06-25
+2021-07-02--2021-07-09
+2021-07-02--2021-07-09
+
+1
+2
+3
+5
+4
+8
+14
+7
+9
+11
+
+Artist Artist Followers
+The Kid LAROI
+2230022
+Olivia Rodrigo
+6266514
+Ed Sheeran
+83293380
+Lil Nas X
+5473565
+Lil Nas X
+5473565
+Bad Bunny
+36142273
+BTS
+37106176
+Rauw Alejandro
+6080597
+Måneskin
+3377762
+J Balvin, Maria Becerra
+29051363
+
+1
+2
+3
+5
+4
+8
+
+Highest Charting Position
+2
+1
+3
+1
+5
+3
+2
+2
+8
+9
+
+Number of Times Charted
+3
+11
+5
+18
+1
+8
+10
+10
+10
+9
+
+Song Name
+STAY (with Justin Bieber)
+good 4 u
+Bad Habits
+MONTERO (Call Me By Your Name)
+INDUSTRY BABY (feat. Jack Harlow)
+Yonaguni
+Butter
+Todo De Ti
+I WANNA BE YOUR SLAVE
+Qué Más Pues?
+
+Streams
+47,248,719
+40,162,559
+37,799,456
+30,071,134
+33,948,454
+25,030,128
+19,985,713
+26,951,613
+24,551,591
+22,405,111
+
+Song ID
+5HCyWlXZPP0y6Gqq8TgA20
+4ZtFanR9U6ndgddUvNcjcG
+6PQ88X9TkUIAUIZJHW2upE
+67BtfxlNbhBmCDR2L2l8qd
+27NovPIUIRrOZoCHxABJwK
+2JPLbjOn0wPCngEot2STUS
+2bgTY4UwhfBYhGT4HUYStN
+4fSIb4hdOQ151TILNsSEaF
+4pt5fDVTg5GhEvEtlz9dKk
+6hf0RpxTbOprT5nnwzkk8e
+
+Genre
+['australian hip hop']
+['pop']
+['pop', 'uk pop']
+['lgbtq+ hip hop', 'pop rap']
+['lgbtq+ hip hop', 'pop rap']
+['latin', 'reggaeton', 'trap latino']
+
+7
+
+\
+
+\
+
+\
+
+… Danceability Energy
+…
+0.591 0.764
+…
+0.563 0.664
+…
+0.808 0.897
+…
+0.61 0.508
+…
+0.736 0.704
+…
+0.644 0.648
+
+\
+
+14
+7
+9
+11
+
+['k-pop', 'k-pop boy group']
+['puerto rican pop', 'trap latino']
+['indie rock italiano', 'italian pop']
+['latin', 'reggaeton', 'reggaeton colombiano']
+
+1
+2
+3
+5
+4
+8
+14
+7
+9
+11
+
+Loudness Speechiness Acousticness Liveness
+-5.484
+0.0483
+0.0383
+0.103
+-5.044
+0.154
+0.335
+0.0849
+-3.712
+0.0348
+0.0469
+0.364
+-6.682
+0.152
+0.297
+0.384
+-7.409
+0.0615
+0.0203
+0.0501
+-4.601
+0.118
+0.276
+0.135
+-5.187
+0.0948
+0.00323
+0.0906
+-3.605
+0.0506
+0.31
+0.0932
+0.0387
+-4.008
+0.00165
+0.178
+-3.964
+0.106
+0.0261
+0.173
+
+1
+2
+3
+5
+4
+8
+14
+7
+9
+11
+
+Chord
+C#/Db
+A
+B
+G#/Ab
+D#/Eb
+C#/Db
+G#/Ab
+D#/Eb
+C#/Db
+G#/Ab
+
+…
+…
+…
+…
+
+0.759
+0.78
+0.75
+0.891
+
+Tempo Duration (ms) Valence
+169.928
+141806
+0.478
+166.928
+178147
+0.688
+126.026
+231041
+0.591
+178.818
+137876
+0.758
+149.995
+212000
+0.894
+179.951
+206710
+0.44
+109.997
+164442
+0.695
+127.949
+199604
+0.342
+173347
+0.958
+132.507
+101.968
+217773
+0.768
+
+[10 rows x 23 columns]
+
+4
+
+Data Cleaning and Feature Engineering
+
+4.1
+
+New copy of dataframe
+
+[225]: df_cleaning = df_1.copy()
+df_cleaning
+[225]:
+0
+1
+2
+3
+4
+…
+1551
+1552
+
+Index
+1
+2
+3
+4
+5
+…
+1552
+1553
+
+Highest Charting Position
+1
+2
+1
+3
+5
+…
+195
+196
+
+Number of Times Charted
+8
+3
+11
+5
+1
+…
+1
+1
+
+8
+
+0.459
+0.718
+0.608
+0.819
+
+\
+
+\
+
+1553
+1554
+1555
+
+1554
+1555
+1556
+
+Week of Highest Charting
+0
+2021-07-23--2021-07-30
+1
+2021-07-23--2021-07-30
+2
+2021-06-25--2021-07-02
+3
+2021-07-02--2021-07-09
+4
+2021-07-23--2021-07-30
+…
+…
+1551
+2019-12-27--2020-01-03
+1552
+2019-12-27--2020-01-03
+1553
+2019-12-27--2020-01-03
+1554
+2019-12-27--2020-01-03
+1555
+2019-12-27--2020-01-03
+
+197
+198
+199
+
+1
+1
+1
+
+Song Name
+Beggin'
+STAY (with Justin Bieber)
+good 4 u
+Bad Habits
+INDUSTRY BABY (feat. Jack Harlow)
+…
+New Rules
+Cheirosa - Ao Vivo
+Havana (feat. Young Thug)
+Surtada - Remix Brega Funk
+Lover (Remix) [feat. Shawn Mendes]
+
+Streams
+48,633,449
+47,248,719
+40,162,559
+37,799,456
+33,948,454
+…
+4,630,675
+4,623,030
+4,620,876
+4,607,385
+4,595,450
+
+0
+1
+2
+3
+4
+…
+1551
+1552
+1553
+1554
+1555
+
+Artist Artist Followers
+Måneskin
+3377762
+The Kid LAROI
+2230022
+Olivia Rodrigo
+6266514
+Ed Sheeran
+83293380
+Lil Nas X
+5473565
+…
+…
+Dua Lipa
+27167675
+Jorge & Mateus
+15019109
+Camila Cabello
+22698747
+Dadá Boladão, Tati Zaqui, OIK
+208630
+Taylor Swift
+42227614
+
+0
+1
+2
+3
+4
+…
+1551
+1552
+1553
+1554
+1555
+
+Genre … Danceability
+['indie rock italiano', 'italian pop'] …
+0.714
+['australian hip hop'] …
+0.591
+['pop'] …
+0.563
+['pop', 'uk pop'] …
+0.808
+['lgbtq+ hip hop', 'pop rap'] …
+0.736
+… …
+…
+['dance pop', 'pop', 'uk pop'] …
+0.762
+['sertanejo', 'sertanejo universitario'] …
+0.528
+['dance pop', 'electropop', 'pop', 'post-teen … …
+0.765
+['brega funk', 'funk carioca'] …
+0.832
+['pop', 'post-teen pop'] …
+0.448
+
+0
+1
+2
+
+Energy Loudness Speechiness Acousticness Liveness
+0.8
+-4.808
+0.0504
+0.127
+0.359
+0.764
+-5.484
+0.0483
+0.0383
+0.103
+0.154
+0.664
+-5.044
+0.335
+0.0849
+
+9
+
+Song ID
+3Wrjm47oTz2sjIgck11l5e
+5HCyWlXZPP0y6Gqq8TgA20
+4ZtFanR9U6ndgddUvNcjcG
+6PQ88X9TkUIAUIZJHW2upE
+27NovPIUIRrOZoCHxABJwK
+…
+2ekn2ttSfGqwhhate0LSR0
+2PWjKmjyTZeDpmOUa3a5da
+1rfofaqEpACxVEHIZBJe6W
+5F8ffc8KWKNawllr5WsW0r
+3i9UVldZOE0aD0JnyfAZZ0
+
+\
+
+\
+
+\
+
+Tempo Duration (ms)
+134.002
+211560
+169.928
+141806
+178147
+166.928
+
+\
+
+3
+4
+…
+1551
+1552
+1553
+1554
+1555
+
+0.897
+0.704
+…
+0.7
+0.87
+0.523
+0.55
+0.603
+
+-3.712
+-7.409
+…
+-6.021
+-3.123
+-4.333
+-7.026
+-7.176
+
+0
+1
+2
+3
+4
+…
+1551
+1552
+1553
+1554
+1555
+
+Valence Chord
+0.589
+B
+0.478 C#/Db
+0.688
+A
+0.591
+B
+0.894 D#/Eb
+…
+…
+0.608
+A
+0.714
+B
+0.394
+D
+0.881
+F
+0.422
+G
+
+0.0348
+0.0615
+…
+
+…
+0.0694
+0.0851
+0.03
+0.0587
+0.064
+
+0.0469
+0.0203
+…
+0.00261
+0.24
+0.184
+0.249
+0.433
+
+0.364
+0.0501
+…
+0.153
+0.333
+0.132
+0.182
+0.0862
+
+126.026
+149.995
+…
+116.073
+152.37
+104.988
+154.064
+205.272
+
+231041
+212000
+209320
+181930
+217307
+152784
+221307
+
+[1556 rows x 23 columns]
+
+4.2
+
+drop Index
+
+[226]: df_cleaning.drop('Index', axis = 1, inplace = True)
+#i
+[227]: df_cleaning.transpose()
+[227]:
+
+0
+Highest Charting Position
+Number of Times Charted
+Week of Highest Charting
+Song Name
+Streams
+Artist
+Artist Followers
+Song ID
+Genre
+Release Date
+Weeks Charted
+Popularity
+Danceability
+Energy
+Loudness
+
+1
+8
+2021-07-23--2021-07-30
+Beggin'
+48,633,449
+Måneskin
+3377762
+3Wrjm47oTz2sjIgck11l5e
+['indie rock italiano', 'italian pop']
+2017-12-08
+2021-07-23--2021-07-30\n2021-07-16--2021-07-23…
+100
+0.714
+0.8
+-4.808
+
+10
+
+\
+
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+Chord
+
+0.0504
+0.127
+0.359
+134.002
+211560
+0.589
+B
+1
+
+Highest Charting Position
+Number of Times Charted
+Week of Highest Charting
+Song Name
+Streams
+Artist
+Artist Followers
+Song ID
+Genre
+Release Date
+Weeks Charted
+Popularity
+Danceability
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+Chord
+
+2
+Highest Charting Position
+Number of Times Charted
+Week of Highest Charting
+Song Name
+Streams
+Artist
+Artist Followers
+Song ID
+Genre
+Release Date
+Weeks Charted
+Popularity
+Danceability
+Energy
+
+\
+
+2
+3
+2021-07-23--2021-07-30
+STAY (with Justin Bieber)
+47,248,719
+The Kid LAROI
+2230022
+5HCyWlXZPP0y6Gqq8TgA20
+['australian hip hop']
+2021-07-09
+2021-07-23--2021-07-30\n2021-07-16--2021-07-23…
+99
+0.591
+0.764
+-5.484
+0.0483
+0.0383
+0.103
+169.928
+141806
+0.478
+C#/Db
+
+1
+11
+2021-06-25--2021-07-02
+good 4 u
+40,162,559
+Olivia Rodrigo
+6266514
+4ZtFanR9U6ndgddUvNcjcG
+['pop']
+2021-05-21
+2021-07-23--2021-07-30\n2021-07-16--2021-07-23…
+99
+0.563
+0.664
+
+11
+
+\
+
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+Chord
+
+-5.044
+0.154
+0.335
+0.0849
+166.928
+178147
+0.688
+A
+3
+
+Highest Charting Position
+Number of Times Charted
+Week of Highest Charting
+Song Name
+Streams
+Artist
+Artist Followers
+Song ID
+Genre
+Release Date
+Weeks Charted
+Popularity
+Danceability
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+Chord
+
+3
+5
+2021-07-02--2021-07-09
+Bad Habits
+37,799,456
+Ed Sheeran
+83293380
+6PQ88X9TkUIAUIZJHW2upE
+['pop', 'uk pop']
+2021-06-25
+2021-07-23--2021-07-30\n2021-07-16--2021-07-23…
+98
+0.808
+0.897
+-3.712
+0.0348
+0.0469
+0.364
+126.026
+231041
+0.591
+B
+4
+
+Highest Charting Position
+Number of Times Charted
+Week of Highest Charting
+Song Name
+Streams
+Artist
+Artist Followers
+Song ID
+Genre
+Release Date
+Weeks Charted
+Popularity
+Danceability
+
+5
+1
+2021-07-23--2021-07-30
+INDUSTRY BABY (feat. Jack Harlow)
+33,948,454
+Lil Nas X
+5473565
+27NovPIUIRrOZoCHxABJwK
+['lgbtq+ hip hop', 'pop rap']
+2021-07-23
+2021-07-23--2021-07-30
+96
+0.736
+
+12
+
+\
+
+\
+
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+Chord
+
+0.704
+-7.409
+0.0615
+0.0203
+0.0501
+149.995
+212000
+0.894
+D#/Eb
+5
+
+Highest Charting Position
+Number of Times Charted
+Week of Highest Charting
+Song Name
+Streams
+Artist
+Artist Followers
+Song ID
+Genre
+Release Date
+Weeks Charted
+Popularity
+Danceability
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+Chord
+
+1
+18
+2021-05-07--2021-05-14
+MONTERO (Call Me By Your Name)
+30,071,134
+Lil Nas X
+5473565
+67BtfxlNbhBmCDR2L2l8qd
+['lgbtq+ hip hop', 'pop rap']
+2021-03-31
+2021-07-23--2021-07-30\n2021-07-16--2021-07-23…
+97
+0.61
+0.508
+-6.682
+0.152
+0.297
+0.384
+178.818
+137876
+0.758
+G#/Ab
+6
+
+Highest Charting Position
+Number of Times Charted
+Week of Highest Charting
+Song Name
+Streams
+Artist
+Artist Followers
+Song ID
+Genre
+Release Date
+Weeks Charted
+Popularity
+
+\
+
+3
+16
+2021-05-14--2021-05-21
+Kiss Me More (feat. SZA)
+29,356,736
+Doja Cat
+8640063
+748mdHapucXQri7IAO8yFK
+['dance pop', 'pop']
+2021-04-09
+2021-07-23--2021-07-30\n2021-07-16--2021-07-23…
+94
+
+13
+
+\
+
+Danceability
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+Chord
+
+0.762
+0.701
+-3.541
+0.0286
+0.235
+0.123
+110.968
+208867
+0.742
+G#/Ab
+7
+
+Highest Charting Position
+Number of Times Charted
+Week of Highest Charting
+Song Name
+Streams
+Artist
+Artist Followers
+Song ID
+Genre
+Release Date
+Weeks Charted
+Popularity
+Danceability
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+Chord
+
+8
+Highest Charting Position
+Number of Times Charted
+Week of Highest Charting
+Song Name
+Streams
+Artist
+Artist Followers
+Song ID
+Genre
+Release Date
+Weeks Charted
+
+\
+
+2
+10
+2021-06-18--2021-06-25
+Todo De Ti
+26,951,613
+Rauw Alejandro
+6080597
+4fSIb4hdOQ151TILNsSEaF
+['puerto rican pop', 'trap latino']
+2021-05-20
+2021-07-23--2021-07-30\n2021-07-16--2021-07-23…
+95
+0.78
+0.718
+-3.605
+0.0506
+0.31
+0.0932
+127.949
+199604
+0.342
+D#/Eb
+
+3
+8
+2021-06-18--2021-06-25
+Yonaguni
+25,030,128
+Bad Bunny
+36142273
+2JPLbjOn0wPCngEot2STUS
+['latin', 'reggaeton', 'trap latino']
+2021-06-04
+2021-07-23--2021-07-30\n2021-07-16--2021-07-23…
+
+14
+
+\
+
+Popularity
+Danceability
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+Chord
+
+96
+0.644
+0.648
+-4.601
+0.118
+0.276
+0.135
+179.951
+206710
+0.44
+C#/Db
+9
+
+Highest Charting Position
+Number of Times Charted
+Week of Highest Charting
+Song Name
+Streams
+Artist
+Artist Followers
+Song ID
+Genre
+Release Date
+Weeks Charted
+Popularity
+Danceability
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+Chord
+
+8
+10
+2021-07-02--2021-07-09
+I WANNA BE YOUR SLAVE
+24,551,591
+Måneskin
+3377762
+4pt5fDVTg5GhEvEtlz9dKk
+['indie rock italiano', 'italian pop']
+2021-03-19
+2021-07-23--2021-07-30\n2021-07-16--2021-07-23…
+95
+0.75
+0.608
+-4.008
+0.0387
+0.00165
+0.178
+132.507
+173347
+0.958
+C#/Db
+
+Highest Charting Position
+Number of Times Charted
+Week of Highest Charting
+Song Name
+Streams
+Artist
+Artist Followers
+Song ID
+Genre
+Release Date
+
+…
+…
+…
+…
+…
+…
+…
+…
+…
+…
+…
+
+1546
+143
+1
+2019-12-27--2020-01-03
+JACKBOYS
+5,363,493
+JACKBOYS
+437907
+62zKJrpbLxz6InR3tGyr7o
+['rap', 'trap']
+2019-12-27
+
+15
+
+\
+
+\
+
+Weeks Charted
+Popularity
+Danceability
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+Chord
+
+…
+…
+…
+…
+…
+…
+…
+…
+…
+…
+…
+…
+
+2019-12-27--2020-01-03
+56
+0.413
+0.13
+-25.166
+0.0336
+0.9
+0.111
+123.342
+46837
+0.0676
+C
+
+Highest Charting Position
+Number of Times Charted
+Week of Highest Charting
+Song Name
+Streams
+Artist
+Artist Followers
+Song ID
+Genre
+Release Date
+Weeks Charted
+Popularity
+Danceability
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+Chord
+
+1547
+156
+1
+2019-12-27--2020-01-03
+Combatchy (feat. MC Rebecca)
+5,149,797
+Anitta, Lexa, Luísa Sonza
+10741972
+2bPtwnrpFNEe8N7Q85kLHw
+['funk carioca', 'funk pop', 'pagode baiano', …
+2019-11-20
+2019-12-27--2020-01-03
+64
+0.826
+0.73
+-3.032
+0.0809
+0.383
+0.0197
+150.134
+157600
+0.605
+C#/Db
+
+Highest Charting Position
+Number of Times Charted
+Week of Highest Charting
+Song Name
+Streams
+Artist
+Artist Followers
+Song ID
+Genre
+
+1548
+178
+1
+2019-12-27--2020-01-03
+Old Town Road
+4,852,004
+Lil Nas X
+5488666
+2YpeDb67231RjR0MgVLzsG
+['lgbtq+ hip hop', 'pop rap']
+
+16
+
+\
+
+\
+
+Release Date
+Weeks Charted
+Popularity
+Danceability
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+Chord
+
+Highest Charting Position
+Number of Times Charted
+Week of Highest Charting
+Song Name
+Streams
+Artist
+Artist Followers
+Song ID
+Genre
+Release Date
+Weeks Charted
+Popularity
+Danceability
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+Chord
+
+2019-06-21
+2019-12-27--2020-01-03
+81
+0.878
+0.619
+-5.56
+0.102
+0.0533
+0.113
+136.041
+157067
+0.639
+F#/Gb
+1549
+187
+1
+2019-12-27--2020-01-03
+Let Me Know (I Wonder Why Freestyle)
+4,701,532
+Juice WRLD
+19102888
+3wwo0bJvDSorOpNfzEkfXx
+['chicago rap', 'melodic rap']
+2019-12-07
+2019-12-27--2020-01-03
+76
+0.635
+0.537
+-7.895
+0.0832
+0.172
+0.418
+125.028
+215381
+0.383
+G
+
+\
+
+1550
+190
+1
+2019-12-27--2020-01-03
+Ne reviens pas
+4,676,857
+Gradur, Heuss L'enfoiré
+1390813
+4TnFANpjVwVKWzkxNzIyFH
+
+Highest Charting Position
+Number of Times Charted
+Week of Highest Charting
+Song Name
+Streams
+Artist
+Artist Followers
+Song ID
+
+17
+
+\
+
+Genre
+Release Date
+Weeks Charted
+Popularity
+Danceability
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+Chord
+
+['francoton', 'french hip hop', 'pop urbaine',…
+2019-11-29
+2019-12-27--2020-01-03
+62
+0.932
+0.778
+-3.384
+0.0638
+0.212
+0.168
+124.996
+188613
+0.933
+A#/Bb
+
+Highest Charting Position
+Number of Times Charted
+Week of Highest Charting
+Song Name
+Streams
+Artist
+Artist Followers
+Song ID
+Genre
+Release Date
+Weeks Charted
+Popularity
+Danceability
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+Chord
+
+1551
+195
+1
+2019-12-27--2020-01-03
+New Rules
+4,630,675
+Dua Lipa
+27167675
+2ekn2ttSfGqwhhate0LSR0
+['dance pop', 'pop', 'uk pop']
+2017-06-02
+2019-12-27--2020-01-03
+79
+0.762
+0.7
+-6.021
+0.0694
+0.00261
+0.153
+116.073
+209320
+0.608
+A
+
+\
+
+1552
+196
+1
+2019-12-27--2020-01-03
+Cheirosa - Ao Vivo
+4,623,030
+Jorge & Mateus
+15019109
+
+Highest Charting Position
+Number of Times Charted
+Week of Highest Charting
+Song Name
+Streams
+Artist
+Artist Followers
+
+18
+
+\
+
+Song ID
+Genre
+Release Date
+Weeks Charted
+Popularity
+Danceability
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+Chord
+
+2PWjKmjyTZeDpmOUa3a5da
+['sertanejo', 'sertanejo universitario']
+2019-10-11
+2019-12-27--2020-01-03
+66
+0.528
+0.87
+-3.123
+0.0851
+0.24
+0.333
+152.37
+181930
+0.714
+B
+
+Highest Charting Position
+Number of Times Charted
+Week of Highest Charting
+Song Name
+Streams
+Artist
+Artist Followers
+Song ID
+Genre
+Release Date
+Weeks Charted
+Popularity
+Danceability
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+Chord
+
+1553
+197
+1
+2019-12-27--2020-01-03
+Havana (feat. Young Thug)
+4,620,876
+Camila Cabello
+22698747
+1rfofaqEpACxVEHIZBJe6W
+['dance pop', 'electropop', 'pop', 'post-teen …
+2018-01-12
+2019-12-27--2020-01-03
+81
+0.765
+0.523
+-4.333
+0.03
+0.184
+0.132
+104.988
+217307
+0.394
+D
+
+Highest Charting Position
+Number of Times Charted
+Week of Highest Charting
+Song Name
+Streams
+Artist
+
+1554
+198
+1
+2019-12-27--2020-01-03
+Surtada - Remix Brega Funk
+4,607,385
+Dadá Boladão, Tati Zaqui, OIK
+
+19
+
+\
+
+\
+
+Artist Followers
+Song ID
+Genre
+Release Date
+Weeks Charted
+Popularity
+Danceability
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+Chord
+
+208630
+5F8ffc8KWKNawllr5WsW0r
+['brega funk', 'funk carioca']
+2019-09-25
+2019-12-27--2020-01-03
+60
+0.832
+0.55
+-7.026
+0.0587
+0.249
+0.182
+154.064
+152784
+0.881
+F
+
+Highest Charting Position
+Number of Times Charted
+Week of Highest Charting
+Song Name
+Streams
+Artist
+Artist Followers
+Song ID
+Genre
+Release Date
+Weeks Charted
+Popularity
+Danceability
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+Chord
+
+1555
+199
+1
+2019-12-27--2020-01-03
+Lover (Remix) [feat. Shawn Mendes]
+4,595,450
+Taylor Swift
+42227614
+3i9UVldZOE0aD0JnyfAZZ0
+['pop', 'post-teen pop']
+2019-11-13
+2019-12-27--2020-01-03
+70
+0.448
+0.603
+-7.176
+0.064
+0.433
+0.0862
+205.272
+221307
+0.422
+G
+
+[22 rows x 1556 columns]
+
+20
+
+4.3
+
+Convert object columns with numbers to float64
+
+[228]: # List of columns to convert
+columns_to_convert = ['Artist Followers', 'Streams','Popularity',␣
+↪'Danceability', 'Energy', 'Loudness',
+'Speechiness', 'Acousticness', 'Liveness', 'Tempo',␣
+↪'Duration (ms)', 'Valence']
+# Convert columns to numeric
+for column in columns_to_convert:
+df_1[column] = pd.to_numeric(df_1[column], errors='coerce')
+[229]: df_1.dtypes
+[229]: Index
+Highest Charting Position
+Number of Times Charted
+Week of Highest Charting
+Song Name
+Streams
+Artist
+Artist Followers
+Song ID
+Genre
+Release Date
+Weeks Charted
+Popularity
+Danceability
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+Chord
+dtype: object
+
+5
+
+int64
+int64
+int64
+object
+object
+float64
+object
+float64
+object
+object
+object
+object
+float64
+float64
+float64
+float64
+float64
+float64
+float64
+float64
+float64
+float64
+object
+
+Data Cleaning Continued: Prepare DataFrame for Modeling
+and Training
+
+[230]: df_1 = df_1.drop("Index", axis = 1)
+[231]: df_1
+
+21
+
+[231]:
+0
+1
+2
+3
+4
+…
+1551
+1552
+1553
+1554
+1555
+
+Highest Charting Position
+1
+2
+1
+3
+5
+…
+195
+196
+197
+198
+199
+
+Week of Highest Charting
+0
+2021-07-23--2021-07-30
+1
+2021-07-23--2021-07-30
+2
+2021-06-25--2021-07-02
+3
+2021-07-02--2021-07-09
+4
+2021-07-23--2021-07-30
+…
+…
+1551
+2019-12-27--2020-01-03
+1552
+2019-12-27--2020-01-03
+1553
+2019-12-27--2020-01-03
+1554
+2019-12-27--2020-01-03
+1555
+2019-12-27--2020-01-03
+
+0
+1
+2
+3
+4
+…
+1551
+1552
+1553
+1554
+1555
+
+0
+1
+2
+3
+4
+…
+1551
+
+Number of Times Charted
+8
+3
+11
+5
+1
+…
+1
+1
+1
+1
+1
+
+\
+
+Song Name Streams
+Beggin'
+NaN
+STAY (with Justin Bieber)
+NaN
+good 4 u
+NaN
+Bad Habits
+NaN
+INDUSTRY BABY (feat. Jack Harlow)
+NaN
+…
+…
+New Rules
+NaN
+Cheirosa - Ao Vivo
+NaN
+Havana (feat. Young Thug)
+NaN
+Surtada - Remix Brega Funk
+NaN
+Lover (Remix) [feat. Shawn Mendes]
+NaN
+
+Artist
+Måneskin
+The Kid LAROI
+Olivia Rodrigo
+Ed Sheeran
+Lil Nas X
+…
+Dua Lipa
+Jorge & Mateus
+Camila Cabello
+Dadá Boladão, Tati Zaqui, OIK
+Taylor Swift
+
+Artist Followers
+3377762.0
+2230022.0
+6266514.0
+83293380.0
+5473565.0
+…
+27167675.0
+15019109.0
+22698747.0
+208630.0
+42227614.0
+
+Song ID
+3Wrjm47oTz2sjIgck11l5e
+5HCyWlXZPP0y6Gqq8TgA20
+4ZtFanR9U6ndgddUvNcjcG
+6PQ88X9TkUIAUIZJHW2upE
+27NovPIUIRrOZoCHxABJwK
+…
+2ekn2ttSfGqwhhate0LSR0
+2PWjKmjyTZeDpmOUa3a5da
+1rfofaqEpACxVEHIZBJe6W
+5F8ffc8KWKNawllr5WsW0r
+3i9UVldZOE0aD0JnyfAZZ0
+
+Genre Release Date
+['indie rock italiano', 'italian pop']
+2017-12-08
+['australian hip hop']
+2021-07-09
+['pop']
+2021-05-21
+['pop', 'uk pop']
+2021-06-25
+['lgbtq+ hip hop', 'pop rap']
+2021-07-23
+…
+… …
+['dance pop', 'pop', 'uk pop']
+2017-06-02
+
+22
+
+\
+
+…
+…
+…
+…
+…
+…
+…
+
+\
+
+\
+
+1552
+1553
+1554
+1555
+
+['sertanejo', 'sertanejo universitario']
+2019-10-11 …
+['dance pop', 'electropop', 'pop', 'post-teen …
+2018-01-12 …
+['brega funk', 'funk carioca']
+2019-09-25 …
+['pop', 'post-teen pop']
+2019-11-13 …
+
+0
+1
+2
+3
+4
+…
+1551
+1552
+1553
+1554
+1555
+
+Danceability Energy Loudness
+0.714
+0.800
+-4.808
+0.591
+0.764
+-5.484
+0.563
+0.664
+-5.044
+0.808
+0.897
+-3.712
+0.736
+0.704
+-7.409
+…
+…
+…
+0.762
+0.700
+-6.021
+0.528
+0.870
+-3.123
+0.765
+0.523
+-4.333
+0.832
+0.550
+-7.026
+0.448
+0.603
+-7.176
+
+0
+1
+2
+3
+4
+…
+1551
+1552
+1553
+1554
+1555
+
+Tempo
+134.002
+169.928
+166.928
+126.026
+149.995
+…
+116.073
+152.370
+104.988
+154.064
+205.272
+
+Speechiness Acousticness
+0.0504
+0.12700
+0.0483
+0.03830
+0.1540
+0.33500
+0.0348
+0.04690
+0.0615
+0.02030
+…
+…
+…
+0.0694
+0.00261
+0.0851
+0.24000
+0.18400
+0.0300
+0.0587
+0.24900
+0.0640
+0.43300
+
+Duration (ms) Valence
+211560.0
+0.589
+141806.0
+0.478
+178147.0
+0.688
+231041.0
+0.591
+212000.0
+0.894
+…
+…
+…
+209320.0
+0.608
+181930.0
+0.714
+217307.0
+0.394
+152784.0
+0.881
+221307.0
+0.422
+
+Liveness
+0.3590
+0.1030
+0.0849
+0.3640
+0.0501
+0.1530
+0.3330
+0.1320
+0.1820
+0.0862
+
+Chord
+B
+C#/Db
+A
+B
+D#/Eb
+A
+B
+D
+F
+G
+
+[1556 rows x 22 columns]
+[232]: df_clean_2 = df_1.copy()
+
+5.1
+
+Identify Object Columns & Drop them
+
+[233]: object_columns = df_clean_2.select_dtypes(include=['object']).columns
+df_clean_2 = df_clean_2.drop(columns=object_columns)
+[234]: df_clean_2.isnull().sum()
+[234]: Highest Charting Position
+Number of Times Charted
+Streams
+Artist Followers
+Popularity
+
+0
+0
+1556
+11
+11
+
+23
+
+\
+
+Danceability
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+dtype: int64
+
+11
+11
+11
+11
+11
+11
+11
+11
+11
+
+[235]: df_clean_2.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 1556 entries, 0 to 1555
+Data columns (total 14 columns):
+#
+Column
+Non-Null Count
+--- ------------------0
+Highest Charting Position 1556 non-null
+1
+Number of Times Charted
+1556 non-null
+2
+Streams
+0 non-null
+1545 non-null
+3
+Artist Followers
+4
+Popularity
+1545 non-null
+5
+Danceability
+1545 non-null
+6
+Energy
+1545 non-null
+7
+Loudness
+1545 non-null
+8
+Speechiness
+1545 non-null
+9
+Acousticness
+1545 non-null
+10 Liveness
+1545 non-null
+11 Tempo
+1545 non-null
+12 Duration (ms)
+1545 non-null
+13 Valence
+1545 non-null
+dtypes: float64(12), int64(2)
+memory usage: 170.3 KB
+
+5.2
+
+Dtype
+----int64
+int64
+float64
+float64
+float64
+float64
+float64
+float64
+float64
+float64
+float64
+float64
+float64
+float64
+
+Drop Streams Column (essentially empty)
+
+[236]: df_clean_2.drop('Streams', axis = 1, inplace = True)
+[237]: df_clean_2.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 1556 entries, 0 to 1555
+Data columns (total 13 columns):
+#
+Column
+Non-Null Count
+--- ------------------0
+Highest Charting Position 1556 non-null
+1
+Number of Times Charted
+1556 non-null
+24
+
+Dtype
+----int64
+int64
+
+2
+Artist Followers
+3
+Popularity
+4
+Danceability
+5
+Energy
+6
+Loudness
+7
+Speechiness
+8
+Acousticness
+9
+Liveness
+10 Tempo
+11 Duration (ms)
+12 Valence
+dtypes: float64(11), int64(2)
+memory usage: 158.2 KB
+
+5.3
+
+1545 non-null
+1545 non-null
+1545 non-null
+1545 non-null
+1545 non-null
+1545 non-null
+1545 non-null
+1545 non-null
+1545 non-null
+1545 non-null
+1545 non-null
+
+float64
+float64
+float64
+float64
+float64
+float64
+float64
+float64
+float64
+float64
+float64
+
+Get means and replace null values with mean per column
+
+[238]: df_clean_2.isna().sum()
+[238]: Highest Charting Position
+Number of Times Charted
+Artist Followers
+Popularity
+Danceability
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+dtype: int64
+
+0
+0
+11
+11
+11
+11
+11
+11
+11
+11
+11
+11
+11
+
+[239]: null_columns = df_clean_2.columns[df_clean_2.isnull().any()].tolist()
+print("Columns with null values:")
+null_columns
+Columns with null values:
+[239]: ['Artist Followers',
+'Popularity',
+'Danceability',
+'Energy',
+'Loudness',
+'Speechiness',
+'Acousticness',
+'Liveness',
+'Tempo',
+
+25
+
+'Duration (ms)',
+'Valence']
+[240]: for col in null_columns:
+#Calculate the mean, exluding NaN values
+mean= df_clean_2[col].mean(skipna=True)
+#replace NaNs with the mean per column
+df_clean_2[col] = df_clean_2[col].fillna(mean)
+[241]: print("\nNull value count after replacement:")
+print(df_clean_2.isnull().sum())
+Null value count after replacement:
+Highest Charting Position
+0
+Number of Times Charted
+0
+Artist Followers
+0
+Popularity
+0
+Danceability
+0
+Energy
+0
+Loudness
+0
+Speechiness
+0
+Acousticness
+0
+Liveness
+0
+Tempo
+0
+0
+Duration (ms)
+Valence
+0
+dtype: int64
+[242]: df_clean_2.dtypes
+[242]: Highest Charting Position
+Number of Times Charted
+Artist Followers
+Popularity
+Danceability
+Energy
+Loudness
+Speechiness
+Acousticness
+Liveness
+Tempo
+Duration (ms)
+Valence
+dtype: object
+
+int64
+int64
+float64
+float64
+float64
+float64
+float64
+float64
+float64
+float64
+float64
+float64
+float64
+
+26
+
+5.4
+
+Drop columns that have no relation to target = “Popularity”
+
+[243]: # df_clean_2.drop('Highest Charting Position', axis = 1, inplace = True)
+[244]: # df_clean_2.drop('Number of Times Charted', axis = 1, inplace = True)
+[245]: # df_clean_2.drop('Artist Followers', axis = 1, inplace = True)
+[246]: df_scaling = df_clean_2.copy()
+
+6
+
+Data Scaling
+
+6.1
+
+Data Scaling (standard scaler)
+
+6.1.1
+
+Setup standard scaled training and testing data
+
+[247]: df_3_std = df_scaling.copy()
+[248]: x1 = df_3_std.drop(['Popularity'], axis=1)
+y1 = df_3_std['Popularity']
+X_train_1, X_test_1, y_train_1, y_test_1 = train_test_split(x1, y1, test_size=0.
+↪2)
+[249]: scaler = StandardScaler()
+X_train_std = scaler.fit_transform(X_train_1)
+X_test_std = scaler.transform(X_test_1)
+[250]: print("Before scaling:")
+print(X_train_1.describe())
+print("\nAfter scaling:")
+print(pd.DataFrame(X_train_std).describe())
+Before scaling:
+Highest Charting Position
+count
+1244.000000
+mean
+87.094051
+std
+58.183885
+min
+1.000000
+25%
+37.000000
+50%
+79.000000
+75%
+136.000000
+max
+200.000000
+
+count
+mean
+std
+
+Danceability
+1244.000000
+0.688468
+0.141232
+
+Energy
+1244.000000
+0.633641
+0.161968
+
+Number of Times Charted
+1244.000000
+10.704180
+16.363901
+1.000000
+1.000000
+4.000000
+13.000000
+142.000000
+
+Artist Followers
+1.244000e+03
+1.498098e+07
+1.677979e+07
+4.883000e+03
+2.147875e+06
+6.852509e+06
+2.384846e+07
+8.333778e+07
+
+Loudness
+1244.000000
+-6.317772
+2.461254
+
+Acousticness
+1244.000000
+0.251077
+0.250547
+
+27
+
+Speechiness
+1244.000000
+0.122688
+0.110210
+
+\
+
+\
+
+min
+25%
+50%
+75%
+max
+
+count
+mean
+std
+min
+25%
+50%
+75%
+max
+
+0.150000
+0.596000
+0.700000
+0.792000
+0.980000
+
+0.103000
+0.529000
+0.642000
+0.755250
+0.970000
+
+-22.507000
+-7.477000
+-5.949000
+-4.711000
+1.509000
+
+0.023200
+0.045200
+0.077100
+0.162000
+0.884000
+
+Liveness
+1244.000000
+0.181875
+0.145639
+0.019700
+0.096450
+0.124000
+0.215250
+0.962000
+
+Tempo
+1244.000000
+122.477836
+29.725523
+46.718000
+97.732750
+120.636000
+143.052500
+205.272000
+
+Duration (ms)
+1244.000000
+198310.700443
+47777.448759
+30133.000000
+169684.500000
+193544.000000
+218938.500000
+588139.000000
+
+Valence
+1244.000000
+0.513716
+0.226374
+0.032000
+0.344750
+0.514000
+0.690250
+0.979000
+
+0.000025
+0.049200
+0.163000
+0.391250
+0.994000
+
+After scaling:
+0
+1
+2
+3
+4
+count 1.244000e+03 1.244000e+03 1.244000e+03 1.244000e+03 1.244000e+03
+mean -9.567195e-17 -1.285146e-17 -1.028116e-16 5.483288e-16 1.570734e-16
+std
+1.000402e+00 1.000402e+00 1.000402e+00 1.000402e+00 1.000402e+00
+min
+-1.480284e+00 -5.932621e-01 -8.928673e-01 -3.814189e+00 -3.277531e+00
+25%
+-8.613072e-01 -5.932621e-01 -7.651032e-01 -6.549877e-01 -6.463207e-01
+50%
+-1.391675e-01 -4.098580e-01 -4.846154e-01 8.168716e-02 5.162953e-02
+75%
+8.408792e-01 1.403543e-01 5.286745e-01 7.333610e-01 7.511239e-01
+max
+1.941282e+00 8.026730e+00 4.075397e+00 2.065042e+00 2.077538e+00
+
+\
+
+5
+6
+7
+8
+9
+count 1.244000e+03 1.244000e+03 1.244000e+03 1.244000e+03 1.244000e+03
+mean -8.567637e-17 5.711758e-17 -8.567637e-17 -3.498452e-17 8.931762e-16
+std
+1.000402e+00 1.000402e+00 1.000402e+00 1.000402e+00 1.000402e+00
+min
+-6.580281e+00 -9.030682e-01 -1.002417e+00 -1.113990e+00 -2.549671e+00
+25%
+-4.711804e-01 -7.033698e-01 -8.060697e-01 -5.867891e-01 -8.327873e-01
+50%
+1.498912e-01 -4.138072e-01 -3.516805e-01 -3.975463e-01 -6.198636e-02
+75%
+6.530892e-01 3.568470e-01 5.596933e-01 2.292561e-01 6.924332e-01
+max
+3.181273e+00 6.910585e+00 2.966399e+00 5.358732e+00 2.786409e+00
+
+\
+
+10
+11
+count 1.244000e+03 1.244000e+03
+mean
+6.639919e-16 -4.947811e-16
+std
+1.000402e+00 1.000402e+00
+min
+-3.521438e+00 -2.128816e+00
+25%
+-5.993981e-01 -7.466996e-01
+50%
+-9.980896e-02 1.256021e-03
+75%
+4.319213e-01 7.801463e-01
+max
+8.162535e+00 2.056201e+00
+
+28
+
+[251]: print("Mean:", X_train_std.mean(axis=0))
+print("Std:", X_train_std.std(axis=0))
+Mean: [-9.56719520e-17 -1.28514562e-17 -1.02811650e-16 5.48328799e-16
+1.57073354e-16 -8.56763749e-17 5.71175833e-17 -8.56763749e-17
+-3.49845197e-17 8.93176208e-16 6.63991905e-16 -4.94781065e-16]
+Std: [1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1.]
+
+6.2
+
+Data Scaling Continued (min-max scaler)
+
+[252]: df_3_mm = df_scaling.copy()
+[253]: x2 = df_3_mm.drop(['Popularity'], axis=1)
+y2 = df_3_mm['Popularity']
+X_train_2, X_test_2, y_train_2, y_test_2 = train_test_split(x2, y2, test_size=0.
+↪2)
+6.2.1
+
+Setup mm scaled training and testing data
+
+[254]: scaler = MinMaxScaler()
+X_train_mm = scaler.fit_transform(X_train_2)
+X_test_mm = scaler.transform(X_test_2)
+[255]: print("Before scaling:")
+print(X_train_2.describe())
+print("\nAfter scaling:")
+print(pd.DataFrame(X_train_mm).describe())
+Before scaling:
+Highest Charting Position
+count
+1244.000000
+mean
+86.926849
+std
+58.253616
+min
+1.000000
+25%
+36.000000
+50%
+80.000000
+75%
+135.000000
+max
+200.000000
+
+count
+mean
+std
+min
+25%
+50%
+
+Danceability
+1244.000000
+0.690949
+0.141347
+0.184000
+0.605000
+0.708500
+
+Energy
+1244.000000
+0.633837
+0.160735
+0.054000
+0.534000
+0.646000
+
+Number of Times Charted
+1244.000000
+10.955788
+16.711084
+1.000000
+1.000000
+4.000000
+12.000000
+142.000000
+
+Artist Followers
+1.244000e+03
+1.470951e+07
+1.648338e+07
+4.883000e+03
+2.203386e+06
+6.852509e+06
+2.225506e+07
+8.333778e+07
+
+Loudness
+1244.000000
+-6.364796
+2.515898
+-25.166000
+-7.515750
+-5.984000
+
+Acousticness
+1244.000000
+0.248044
+0.250241
+0.000025
+0.048000
+0.161500
+
+29
+
+Speechiness
+1244.000000
+0.124451
+0.111563
+0.023200
+0.045975
+0.075750
+
+\
+
+\
+
+75%
+max
+
+count
+mean
+std
+min
+25%
+50%
+75%
+max
+
+0.794000
+0.980000
+
+0.749250
+0.970000
+
+-4.717000
+-0.515000
+
+0.164000
+0.884000
+
+0.390000
+0.991000
+
+Liveness
+1244.000000
+0.183068
+0.147592
+0.019700
+0.096000
+0.125000
+0.217500
+0.962000
+
+Tempo
+1244.000000
+122.401134
+28.932630
+62.948000
+97.999000
+121.955000
+142.112750
+205.272000
+
+Duration (ms)
+1244.000000
+198614.007959
+48622.010233
+30133.000000
+170147.000000
+193854.000000
+219834.000000
+588139.000000
+
+Valence
+1244.000000
+0.517536
+0.227794
+0.032000
+0.344000
+0.514852
+0.698000
+0.979000
+
+After scaling:
+0
+1244.000000
+0.431793
+0.292732
+0.000000
+0.175879
+0.396985
+0.673367
+1.000000
+
+1
+1244.000000
+0.070608
+0.118518
+0.000000
+0.000000
+0.021277
+0.078014
+1.000000
+
+2
+1244.000000
+0.176456
+0.197802
+0.000000
+0.026382
+0.082172
+0.267003
+1.000000
+
+3
+1244.000000
+0.636870
+0.177571
+0.000000
+0.528894
+0.658920
+0.766332
+1.000000
+
+4
+1244.000000
+0.633010
+0.175474
+0.000000
+0.524017
+0.646288
+0.759007
+1.000000
+
+\
+
+count
+mean
+std
+min
+25%
+50%
+75%
+max
+
+5
+1244.000000
+0.762695
+0.102061
+0.000000
+0.716005
+0.778143
+0.829540
+1.000000
+
+6
+1244.000000
+0.117625
+0.129604
+0.000000
+0.026458
+0.061048
+0.163569
+1.000000
+
+7
+1244.000000
+0.250277
+0.252520
+0.000000
+0.048411
+0.162945
+0.393526
+1.000000
+
+8
+1244.000000
+0.173371
+0.156629
+0.000000
+0.080972
+0.111748
+0.209912
+1.000000
+
+9
+1244.000000
+0.417731
+0.203287
+0.000000
+0.246276
+0.414596
+0.556229
+1.000000
+
+\
+
+count
+mean
+std
+min
+25%
+50%
+75%
+max
+
+count
+mean
+std
+min
+25%
+50%
+75%
+max
+
+10
+1244.000000
+0.301934
+0.087135
+0.000000
+0.250918
+0.293404
+0.339962
+1.000000
+
+11
+1244.000000
+0.512710
+0.240543
+0.000000
+0.329461
+0.509875
+0.703273
+1.000000
+
+[256]: print("Mean:", X_train_mm.mean(axis=0))
+print("Std:", X_train_mm.std(axis=0))
+Mean: [0.43179321 0.07060842 0.17645645 0.63687002 0.6330096
+30
+
+0.76269537
+
+0.11762476 0.25027707 0.1733713 0.41773091 0.30193404 0.51270981]
+Std: [0.29261406 0.11847068 0.19772209 0.17749963 0.17540395 0.10201964
+0.12955168 0.25241835 0.15656641 0.20320535 0.08710025 0.24044618]
+
+7
+
+Model Selection and Training
+
+7.1
+
+Models: STD Scaler
+
+7.1.1
+
+Linear Regression std scaler
+
+[257]: lr_model = LinearRegression()
+lr_model.fit(X_train_std, y_train_1)
+y_pred_lr = lr_model.predict(X_test_std)
+print('Linear Regression:')
+print(f"RMSE: {np.sqrt(mean_squared_error(y_test_1,y_pred_lr)) :.2f}%")
+print(f"R2 Score: {r2_score(y_test_1,y_pred_lr):.2f}")
+Linear Regression:
+RMSE: 15.59%
+R2 Score: 0.05
+Cross Validation Score for Linear Regression
+[258]: lr_model = LinearRegression()
+cv_scores = cross_val_score(lr_model, X_train_1, y_train_1, cv=5,␣
+↪scoring='neg_mean_squared_error')
+rmse = np.sqrt(-cv_scores.mean())
+print(f"Cross-validated RMSE: {rmse:.2f}")
+Cross-validated RMSE: 15.02
+7.1.2
+
+Decision Tree Model std scaler
+
+[259]: dt_model = DecisionTreeRegressor()
+dt_model.fit(X_train_std, y_train_1)
+y_pred_dt = dt_model.predict(X_test_std)
+print("\nDecision Tree:")
+print(f"RMSE: {np.sqrt(mean_squared_error(y_test_1, y_pred_dt)) :.2f}%")
+print(f"R2 Score: {r2_score(y_test_1, y_pred_dt):.2f}")
+Decision Tree:
+RMSE: 12.21%
+R2 Score: 0.42
+Cross Validation Score for Decision Tree
+[260]: dt_model = DecisionTreeRegressor()
+cv_scores = cross_val_score(dt_model, X_train_std, y_train_1, cv=5,␣
+↪scoring='neg_mean_squared_error')
+31
+
+rmse = np.sqrt(-cv_scores.mean())
+print(f"Cross-validated RMSE: {rmse:.2f}")
+Cross-validated RMSE: 12.29
+Feature Importance for Decision Tree
+[261]: dt_model.fit(X_train_std, y_train_1)
+feature_importances = dt_model.feature_importances_
+feature_names = X_train_1.columns
+feature_importance_df = pd.DataFrame({'feature': feature_names, 'importance':␣
+↪feature_importances})
+feature_importance_df = feature_importance_df.sort_values('importance',␣
+↪ascending=False)
+print(feature_importance_df)
+2
+1
+5
+0
+6
+7
+8
+3
+4
+11
+9
+10
+
+feature
+Artist Followers
+Number of Times Charted
+Loudness
+Highest Charting Position
+Speechiness
+Acousticness
+Liveness
+Danceability
+Energy
+Valence
+Tempo
+Duration (ms)
+
+7.1.3
+
+importance
+0.602581
+0.133374
+0.041532
+0.039518
+0.036563
+0.026150
+0.025098
+0.024771
+0.022246
+0.020825
+0.014835
+0.012507
+
+Random Forest Model std scaler
+
+[262]: rf_model = RandomForestRegressor(n_estimators=100)
+rf_model.fit(X_train_std, y_train_1)
+y_pred_rf = rf_model.predict(X_test_std)
+print("\nRandom Forest:")
+print(f"RMSE: {np.sqrt(mean_squared_error(y_test_1, y_pred_rf)) :.2f}%")
+print(f"R2 Score: {r2_score(y_test_1, y_pred_rf):.2f}")
+Random Forest:
+RMSE: 8.41%
+R2 Score: 0.72
+Cross Validation Score for Random Forest
+[263]: rf_model = RandomForestRegressor(n_estimators=100)
+
+32
+
+cv_scores = cross_val_score(rf_model, X_train_1, y_train_1, cv=5,␣
+↪scoring='neg_mean_squared_error')
+rmse = np.sqrt(-cv_scores.mean())
+print(f"Cross-validated RMSE: {rmse:.2f}")
+Cross-validated RMSE: 9.61
+Feature Importance for Random Forest
+[264]: rf_model.fit(X_train_std, y_train_1)
+feature_importances = rf_model.feature_importances_
+feature_names = X_train_1.columns
+feature_importance_df = pd.DataFrame({'feature': feature_names, 'importance':␣
+↪feature_importances})
+feature_importance_df = feature_importance_df.sort_values('importance',␣
+↪ascending=False)
+print(feature_importance_df)
+2
+1
+5
+0
+10
+11
+3
+8
+6
+7
+4
+9
+
+feature
+Artist Followers
+Number of Times Charted
+Loudness
+Highest Charting Position
+Duration (ms)
+Valence
+Danceability
+Liveness
+Speechiness
+Acousticness
+Energy
+Tempo
+
+7.1.4
+
+importance
+0.539098
+0.137127
+0.052602
+0.041355
+0.033895
+0.033726
+0.030353
+0.029702
+0.029254
+0.028065
+0.026312
+0.018511
+
+XGBoost Model std scaler
+
+[265]: xgb_model = xgb.XGBRegressor(n_estimators=100)
+xgb_model.fit(X_train_std, y_train_1)
+y_pred_xgb = xgb_model.predict(X_test_std)
+print("\nXGBoost:")
+print(f"RMSE: {np.sqrt(mean_squared_error(y_test_1, y_pred_xgb)) :.2f}%")
+print(f"R2 Score: {r2_score(y_test_1, y_pred_xgb):.2f}")
+XGBoost:
+RMSE: 9.65%
+R2 Score: 0.64
+Cross Validation Score for XGBoost
+
+33
+
+[266]: xgb_model = RandomForestRegressor(n_estimators=100)
+cv_scores = cross_val_score(rf_model, X_train_std, y_train_1, cv=5,␣
+↪scoring='neg_mean_squared_error')
+rmse = np.sqrt(-cv_scores.mean())
+print(f"Cross-validated RMSE: {rmse:.2f}")
+Cross-validated RMSE: 9.58
+Feature Importance for XGBoost
+[267]: xgb_model.fit(X_train_std, y_train_1)
+feature_importances = xgb_model.feature_importances_
+feature_importance_df = pd.DataFrame({'feature': feature_names, 'importance':␣
+↪feature_importances})
+feature_importance_df = feature_importance_df.sort_values('importance',␣
+↪ascending=False)
+print(feature_importance_df)
+2
+1
+5
+0
+10
+6
+3
+7
+11
+4
+8
+9
+
+feature
+Artist Followers
+Number of Times Charted
+Loudness
+Highest Charting Position
+Duration (ms)
+Speechiness
+Danceability
+Acousticness
+Valence
+Energy
+Liveness
+Tempo
+
+7.1.5
+
+importance
+0.539136
+0.136517
+0.048051
+0.042899
+0.032699
+0.032154
+0.031749
+0.028936
+0.028912
+0.028768
+0.028468
+0.021709
+
+STD Model Comparison Table
+
+34
+
+[ ]: results = {
+'Model': ['Linear Regression', 'Decision Tree', 'Random Forest', 'XGBoost'],
+'RMSE': [np.sqrt(mean_squared_error(y_test_1, y_pred_lr)),
+np.sqrt(mean_squared_error(y_test_1, y_pred_dt)),
+np.sqrt(mean_squared_error(y_test_1, y_pred_rf)),
+np.sqrt(mean_squared_error(y_test_1, y_pred_xgb))],
+'R2 Score': [r2_score(y_test_1, y_pred_lr),
+r2_score(y_test_1, y_pred_dt),
+r2_score(y_test_1, y_pred_rf),
+r2_score(y_test_1, y_pred_xgb)]
+}
+results_df = pd.DataFrame(results)
+print(results_df)
+0
+1
+2
+3
+
+Model
+Linear Regression
+Decision Tree
+Random Forest
+XGBoost
+
+RMSE
+15.592614
+12.212741
+8.411266
+9.646788
+
+R2 Score
+0.051654
+0.418224
+0.724036
+0.637010
+
+7.2
+
+Models: MM Scaler
+
+7.2.1
+
+Linear Regression mm scaler
+
+[269]: lr_model = LinearRegression()
+lr_model.fit(X_train_mm, y_train_2)
+y_pred_lr = lr_model.predict(X_test_mm)
+print('Linear Regression:')
+print(f"RMSE: {np.sqrt(mean_squared_error(y_test_2,y_pred_lr)) :.2f}%")
+print(f"R2 Score: {r2_score(y_test_2,y_pred_lr):.2f}")
+Linear Regression:
+RMSE: 17.01%
+R2 Score: -0.02
+Cross Validation Score for Linear Regression mm
+[270]: lr_model = LinearRegression()
+cv_scores = cross_val_score(lr_model, X_train_mm, y_train_2, cv=5,␣
+↪scoring='neg_mean_squared_error')
+rmse = np.sqrt(-cv_scores.mean())
+print(f"Cross-validated RMSE: {rmse:.2f}")
+Cross-validated RMSE: 14.60
+
+35
+
+7.2.2
+
+Decision Tree mm scaler
+
+[271]: dt_model = DecisionTreeRegressor()
+dt_model.fit(X_train_mm, y_train_2)
+y_pred_dt = dt_model.predict(X_test_mm)
+print("\nDecision Tree:")
+print(f"RMSE: {np.sqrt(mean_squared_error(y_test_2, y_pred_dt)) :.2f}%")
+print(f"R2 Score: {r2_score(y_test_2, y_pred_dt):.2f}")
+Decision Tree:
+RMSE: 11.16%
+R2 Score: 0.56
+Cross Validation Score for Decision Tree mm
+[272]: cv_scores = cross_val_score(dt_model, X_train_mm, y_train_2, cv=5,␣
+↪scoring='neg_mean_squared_error')
+rmse = np.sqrt(-cv_scores.mean())
+print(f"Cross-validated RMSE: {rmse:.2f}")
+Cross-validated RMSE: 12.49
+Feature Importance for Decision Tree mm
+[273]: dt_model.fit(X_train_mm, y_train_2)
+feature_importances = dt_model.feature_importances_
+feature_names = X_train_2.columns
+feature_importance_df = pd.DataFrame({'feature': feature_names, 'importance':␣
+↪feature_importances})
+feature_importance_df = feature_importance_df.sort_values('importance',␣
+↪ascending=False)
+print(feature_importance_df)
+2
+1
+0
+5
+11
+3
+8
+6
+4
+7
+9
+10
+
+feature
+Artist Followers
+Number of Times Charted
+Highest Charting Position
+Loudness
+Valence
+Danceability
+Liveness
+Speechiness
+Energy
+Acousticness
+Tempo
+Duration (ms)
+
+importance
+0.580435
+0.136437
+0.042719
+0.038880
+0.036713
+0.035402
+0.029966
+0.027298
+0.022451
+0.019296
+0.017623
+0.012780
+
+36
+
+7.2.3
+
+Random Forest mm scaler
+
+[274]: rf_model = RandomForestRegressor(n_estimators=100)
+rf_model.fit(X_train_mm, y_train_2)
+y_pred_rf = rf_model.predict(X_test_mm)
+print("\nRandom Forest:")
+print(f"RMSE: {np.sqrt(mean_squared_error(y_test_2, y_pred_rf)) :.2f}%")
+print(f"R2 Score: {r2_score(y_test_2, y_pred_rf):.2f}")
+Random Forest:
+RMSE: 8.75%
+R2 Score: 0.73
+Cross Validation Score Random Forest mm
+[275]: rf_model = RandomForestRegressor(n_estimators=100)
+cv_scores = cross_val_score(rf_model, X_train_2, y_train_2, cv=5,␣
+↪scoring='neg_mean_squared_error')
+rmse = np.sqrt(-cv_scores.mean())
+print(f"Cross-validated RMSE: {rmse:.2f}")
+Cross-validated RMSE: 9.61
+Feature Importance for Random Forest mm
+[276]: rf_model.fit(X_train_mm, y_train_2)
+feature_importances = rf_model.feature_importances_
+feature_names = X_train_2.columns
+feature_importance_df = pd.DataFrame({'feature': feature_names, 'importance':␣
+↪feature_importances})
+feature_importance_df = feature_importance_df.sort_values('importance',␣
+↪ascending=False)
+print(feature_importance_df)
+2
+1
+5
+0
+3
+10
+8
+11
+4
+6
+7
+9
+
+feature
+Artist Followers
+Number of Times Charted
+Loudness
+Highest Charting Position
+Danceability
+Duration (ms)
+Liveness
+Valence
+Energy
+Speechiness
+Acousticness
+Tempo
+
+importance
+0.467310
+0.152765
+0.064687
+0.050502
+0.046180
+0.039711
+0.039666
+0.032487
+0.030358
+0.029676
+0.024908
+0.021751
+
+37
+
+7.2.4
+
+XGBoost mm scaler
+
+[277]: xgb_model = xgb.XGBRegressor(n_estimators=100)
+xgb_model.fit(X_train_mm, y_train_2)
+y_pred_xgb = xgb_model.predict(X_test_mm)
+print("\nXGBoost:")
+print(f"RMSE: {np.sqrt(mean_squared_error(y_test_2, y_pred_xgb)) :.2f}%")
+print(f"R2 Score: {r2_score(y_test_2, y_pred_xgb):.2f}")
+XGBoost:
+RMSE: 10.04%
+R2 Score: 0.65
+Cross Validation Score for XGBoost mm
+[278]: xgb_model = xgb.XGBRegressor(n_estimators=100)
+cv_scores = cross_val_score(rf_model, X_train_2, y_train_2, cv=5,␣
+↪scoring='neg_mean_squared_error')
+rmse = np.sqrt(-cv_scores.mean())
+print(f"Cross-validated RMSE: {rmse:.2f}")
+Cross-validated RMSE: 9.70
+Feature Importance for XGBoost mm
+[279]: xgb_model.fit(X_train_mm, y_train_2)
+feature_importances = xgb_model.feature_importances_
+feature_names = X_train_2.columns
+feature_importance_df = pd.DataFrame({'feature': feature_names, 'importance':␣
+↪feature_importances})
+feature_importance_df = feature_importance_df.sort_values('importance',␣
+↪ascending=False)
+print(feature_importance_df)
+2
+1
+10
+5
+3
+7
+6
+0
+8
+11
+4
+9
+
+feature
+Artist Followers
+Number of Times Charted
+Duration (ms)
+Loudness
+Danceability
+Acousticness
+Speechiness
+Highest Charting Position
+Liveness
+Valence
+Energy
+Tempo
+
+importance
+0.500847
+0.175418
+0.049582
+0.048682
+0.038835
+0.032982
+0.031613
+0.031202
+0.028909
+0.021981
+0.021857
+0.018092
+
+38
+
+7.2.5
+
+MM Model Comparison Table
+
+[280]: results = {
+'Model': ['Linear Regression', 'Decision Tree', 'Random Forest', 'XGBoost'],
+'RMSE': [np.sqrt(mean_squared_error(y_test_2, y_pred_lr)),
+np.sqrt(mean_squared_error(y_test_2, y_pred_dt)),
+np.sqrt(mean_squared_error(y_test_2, y_pred_rf)),
+np.sqrt(mean_squared_error(y_test_2, y_pred_xgb))],
+'R2 Score': [r2_score(y_test_2, y_pred_lr),
+r2_score(y_test_2, y_pred_dt),
+r2_score(y_test_2, y_pred_rf),
+r2_score(y_test_2, y_pred_xgb)]
+}
+results_df = pd.DataFrame(results)
+print(results_df)
+0
+1
+2
+3
+
+Model
+Linear Regression
+Decision Tree
+Random Forest
+XGBoost
+
+7.3
+
+RMSE R2 Score
+17.012064 -0.015730
+11.157011 0.563122
+8.752230 0.731155
+10.041574 0.646110
+
+Model Plotting STD Scaler
+
+[281]: plt.figure(figsize=(15, 10))
+plt.subplot(2, 2, 1)
+plt.scatter(y_test_1, y_pred_lr)
+plt.plot([y_test_1.min(), y_test_1.max()], [y_test_1.min(), y_test_1.max()],␣
+↪'r--', lw=2)
+plt.xlabel('Actual Popularity')
+plt.ylabel('Predicted Popularity')
+plt.title('Linear Regression')
+plt.subplot(2, 2, 2)
+plt.scatter(y_test_1, y_pred_dt)
+plt.plot([y_test_1.min(), y_test_1.max()], [y_test_1.min(), y_test_1.max()],␣
+↪'r--', lw=2)
+plt.xlabel('Actual Popularity')
+plt.ylabel('Predicted Popularity')
+plt.title('Decision Tree')
+plt.subplot(2, 2, 3)
+plt.scatter(y_test_1, y_pred_rf)
+plt.plot([y_test_1.min(), y_test_1.max()], [y_test_1.min(), y_test_1.max()],␣
+↪'r--', lw=2)
+plt.xlabel('Actual Popularity')
+39
+
+plt.ylabel('Predicted Popularity')
+plt.title('Random Forest')
+plt.subplot(2, 2, 4)
+plt.scatter(y_test_1, y_pred_xgb)
+plt.plot([y_test_1.min(), y_test_1.max()], [y_test_1.min(), y_test_1.max()],␣
+↪'r--', lw=2)
+plt.xlabel('Actual Popularity')
+plt.ylabel('Predicted Popularity')
+plt.title('XGBoost')
+plt.tight_layout()
+plt.suptitle('Model Performance - Standard Scaling')
+plt.show()
+
+7.4
+
+Model Plotting MinMax Scaler
+
+[282]: plt.figure(figsize=(15, 10))
+plt.subplot(2, 2, 1)
+plt.scatter(y_test_2, y_pred_lr)
+plt.plot([y_test_2.min(), y_test_2.max()], [y_test_2.min(), y_test_2.max()],␣
+↪'r--', lw=2)
+
+40
+
+plt.xlabel('Actual Popularity')
+plt.ylabel('Predicted Popularity')
+plt.title('Linear Regression')
+plt.subplot(2, 2, 2)
+plt.scatter(y_test_2, y_pred_dt)
+plt.plot([y_test_2.min(), y_test_2.max()], [y_test_2.min(), y_test_2.max()],␣
+↪'r--', lw=2)
+plt.xlabel('Actual Popularity')
+plt.ylabel('Predicted Popularity')
+plt.title('Decision Tree')
+plt.subplot(2, 2, 3)
+plt.scatter(y_test_2, y_pred_rf)
+plt.plot([y_test_2.min(), y_test_2.max()], [y_test_2.min(), y_test_2.max()],␣
+↪'r--', lw=2)
+plt.xlabel('Actual Popularity')
+plt.ylabel('Predicted Popularity')
+plt.title('Random Forest')
+plt.subplot(2, 2, 4)
+plt.scatter(y_test_2, y_pred_xgb)
+plt.plot([y_test_2.min(), y_test_2.max()], [y_test_2.min(), y_test_2.max()],␣
+↪'r--', lw=2)
+plt.xlabel('Actual Popularity')
+plt.ylabel('Predicted Popularity')
+plt.title('XGBoost')
+plt.tight_layout()
+plt.suptitle('Model Performance - Min-Max Scaling')
+plt.show()
+
+41
+
+7.5
+
+Highest Correlated Features by Model and Scaling type
+
+[283]: # Standard Scaling
+dt_importance_std = dt_model.feature_importances_
+rf_importance_std = rf_model.feature_importances_
+xgb_importance_std = xgb_model.feature_importances_
+[284]: # Min-Max Scaling
+dt_importance_mm = dt_model.feature_importances_### STD Model Comparison Table
+results = {
+'Model': ['Linear Regression', 'Decision Tree', 'Random Forest', 'XGBoost'],
+'RMSE': [np.sqrt(mean_squared_error(y_test_1, y_pred_lr)),
+np.sqrt(mean_squared_error(y_test_1, y_pred_dt)),
+np.sqrt(mean_squared_error(y_test_1, y_pred_rf)),
+np.sqrt(mean_squared_error(y_test_1, y_pred_xgb))],
+'R2 Score': [r2_score(y_test_1, y_pred_lr),
+r2_score(y_test_1, y_pred_dt),
+r2_score(y_test_1, y_pred_rf),
+r2_score(y_test_1, y_pred_xgb)]
+}
+results_df = pd.DataFrame(results)
+print(results_df)
+
+42
+
+rf_importance_mm = rf_model.feature_importances_
+xgb_importance_mm = xgb_model.feature_importances_
+0
+1
+2
+3
+
+Model
+Linear Regression
+Decision Tree
+Random Forest
+XGBoost
+
+RMSE R2 Score
+16.423524 -0.052112
+23.314402 -1.120204
+20.237325 -0.597480
+21.281860 -0.766641
+
+[285]: feature_names = X_train_1.columns
+[286]: def plot_feature_importance(importances, feature_names, model_names, title):
+plt.figure(figsize=(15, 15))
+# Create a DataFrame with feature importances
+df = pd.DataFrame(importances, index=model_names, columns=feature_names)
+# Sort features by average importance across all models
+avg_importance = df.mean()
+sorted_features = avg_importance.sort_values(ascending=False).index
+# Create a custom color map from blue to cerulean
+colors = ["#0000FF", "#00BFFF"] # Blue to Cerulean
+n_bins = 100
+cmap = mcolors.LinearSegmentedColormap.from_list("custom", colors, N=n_bins)
+# Create heatmap
+sns.heatmap(df[sorted_features], annot=True, cmap=cmap, fmt='.2f')
+plt.title(title)
+plt.xlabel('Features')
+plt.ylabel('Models')
+plt.xticks(rotation=45, ha='right')
+plt.yticks(rotation=0)
+plt.tight_layout()
+plt.show()
+[287]: # Standard Scaling
+importances_std = [dt_importance_std, rf_importance_std, xgb_importance_std]
+model_names = ['Decision Tree', 'Random Forest', 'XGBoost']
+plot_feature_importance(importances_std, feature_names, model_names, 'Feature␣
+↪Importance - Standard Scaling')
+# Min-Max Scaling
+importances_mm = [dt_importance_mm, rf_importance_mm, xgb_importance_mm]
+
+43
+
+plot_feature_importance(importances_mm, feature_names, model_names, 'Feature␣
+↪Importance - Min-Max Scaling')
+
+44
+
+8
+
+Spotify Song Popularity Prediction Modeling Results
+
+The modeling results from the Spotify song popularity prediction project, using tree-based regression models, offer several insights. Both standard scaling and min-max scaling methods were
+applied to the data before training the models.
+
+8.1
+
+Initial Model Performance
+
+• Linear Regression: Both scaling methods produced similar RMSE scores (around 15-18%)
+and low R2 scores (around 0.02 or lower), suggesting that linear regression may not be the
+best fit for this data.
+45
+
+• Decision Tree: The decision tree model consistently performed poorly with high RMSE scores
+(around 21-23%) and very low, negative R2 scores (around -0.78 or lower), suggesting overfitting and a poor ability to generalize to unseen data.
+• Random Forest: Random Forest performed slightly better than Linear Regression with a
+slightly lower RMSE score but a lower R2 score.
+• XGBoost: The XGBoost model had RMSE scores around 17-20% and R2 scores of -0.2 or
+lower.
+
+8.2
+
+Initial Feature Importance
+
+• Across all models and scaling methods, “Loudness” consistently emerged as the most important feature for predicting song popularity.
+• Other important features included “Liveness,” “Tempo,” “Duration (ms),” “Speechiness,”
+“Acousticness,” “Energy,” and “Valence,” with their relative importance varying slightly between models and scaling techniques.
+
+8.3
+
+Improved Model Performance
+
+After incorporating additional features and refining the approach, the model performance significantly improved:
+• The Random Forest model emerged as the most effective, achieving an RMSE of 9.39% and
+an R2 score of 0.65 using standard scaling.
+• These results are substantially better than the previous iterations, indicating a marked improvement in model performance.
+
+8.4
+
+Revised Feature Importance
+
+• “Artist Followers” became the most dominant predictor of song popularity across all models.
+• “Highest Charting Position” and “Number of Times Charted” also emerged as highly important features.
+• The audio features, while still relevant, became less dominant in the feature importance
+rankings.
+
+8.5
+
+Key Takeaways
+
+1. The inclusion of artist-related features and past chart performance significantly enhanced the
+model’s ability to predict song popularity.
+2. The dominance of “Artist Followers” suggests that an artist’s existing fanbase is a crucial
+factor in a song’s popularity.
+3. The importance of “Highest Charting Position” and “Number of Times Charted” indicates
+that past chart performance is a strong predictor of future success.
+4. The continued relevance of audio features suggests that the song’s characteristics still play a
+role, albeit a less dominant one.
+5. The improved performance across models
+Comparison Table results = { ‘Model’:
+‘Random Forest’,
+‘XGBoost’],
+‘RMSE’:
+
+46
+
+indicates that th### STD Model
+[‘Linear Regression’, ‘Decision Tree’,
+[np.sqrt(mean_squared_error(y_test_1,
+
+y_pred_lr)),
+np.sqrt(mean_squared_error(y_test_1,
+y_pred_dt)),
+np.sqrt(mean_squared_error(y_test_1, y_pred_rf)), np.sqrt(mean_squared_error(y_test_1,
+y_pred_xgb))], ‘R2 Score’:
+[r2_score(y_test_1, y_pred_lr), r2_score(y_test_1,
+y_pred_dt), r2_score(y_test_1, y_pred_rf), r2_score(y_test_1, y_pred_xgb)] }
+results_df = pd.DataFrame(results) print(results_df)
+• These results suggest that a song’s popularity is heavily influenced by factors external to the
+song itself, such as the artist’s popularity and past chart performance.
+• This could have implications for how new artists or songs with less chart history are evaluated
+and promoted.
+
+8.6
+
+Potential for Further Improvement
+
+• While the results are good, there might still be room for improvement through techniques
+like hyperparameter tuning or exploring other models.
+
+8.7
+
+Limitations
+
+• The strong performance of the model might be partly due to the inclusion of features that
+are highly correlated with the target variable (popularity).
+• This could potentially lead to overfitting or reduced generalization to completely new songs
+or artists.
+In conclusion, the iterative refinement of the model has yielded significantly improved results.
+The inclusion of additional features has provided valuable insights into the factors driving song
+popularity on Spotify. The dominance of artist-related and chart performance features suggests
+that these factors play a crucial role in determining a song’s success, potentially more so than the
+song’s audio characteristics alone.
+
+47
+
+
