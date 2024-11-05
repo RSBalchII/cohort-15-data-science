@@ -1,4 +1,4 @@
-Certainly! Here's a basic list of the positives your project has, focusing on the datasets, data sources, and questions that can be answered:
+Here's a basic list of the positives this project has, focusing on the datasets, data sources, and questions that can be answered:
 
 ### Datasets and Sources
 
