@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM python:3.12-slim
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
@@ -61,12 +61,13 @@ COPY python_reqs/requirements.txt .
 
 # Install JupyterLab and dependencies
 RUN pip install -r requirements.txt
+
 # Copy .bash_it directory into the container
 COPY .bash_it /root/.bash_it
+COPY .bashrc /root/.bashrc
 
 # Set up bash-it
 RUN /bin/bash -c "source /root/.bash_it/bash_it.sh && bash-it install --silent"
 
-# Set the default command to run when starting the container
 # Set the default command to run when starting the container
 CMD ["jupyter", "lab", "--ip=0.0.0.0", "--allow-root"]
