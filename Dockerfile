@@ -48,6 +48,7 @@ RUN apt-get update && apt-get install -y \
     libffi-dev \
     libreoffice \
     pandoc \
+    html2text \ 
     texlive-xetex \
     texlive-fonts-recommended \
     texlive-full \

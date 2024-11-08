@@ -1,5 +1,6 @@
 jupyterlab
 ipykernel
+sentencepiece
 numpy
 pandas
 matplotlib
