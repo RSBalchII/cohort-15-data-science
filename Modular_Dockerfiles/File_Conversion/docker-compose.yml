@@ -1,0 +1,21 @@
+services:
+  converter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: file-converter
+    volumes:
+      - cohort-15-data-science:/notebooks
+    ports:
+      - "8080:8080"
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: ["bash", "-c", "while true; do sleep 30; done;"]
+
+volumes:
+  cohort-15-data-science:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/rsbiim/Code/Projects/cohort-15-data-science

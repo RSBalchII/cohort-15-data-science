@@ -1,6 +1,5 @@
 jupyterlab
 ipykernel
-sentencepiece
 numpy
 pandas
 matplotlib
@@ -30,14 +29,6 @@ tqdm
 ipywidgets
 widgetsnbextension
 ipympl
-jupyter
-nbconvert
-notebook
-pypandoc
-jupyter-sql
-js2py
-regex
-soundfile
-xgboost 
+xgboost
 textblob
 nltk

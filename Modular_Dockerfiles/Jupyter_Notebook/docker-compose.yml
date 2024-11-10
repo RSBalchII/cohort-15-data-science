@@ -1,3 +1,5 @@
+version: "3"
+
 services:
   jupyter:
     container_name: jpynbook
@@ -8,10 +10,15 @@ services:
     ports:
       - "8888:8888"
     volumes:
-      - ../cohort-15-data-science:/notebooks
+      - cohort-15-data-science:/notebooks
     environment:
       - GRANT_SUDO=yes
     user: root
 
 volumes:
-  notebooks:
+  cohort-15-data-science:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/rsbiim/Code/Projects/cohort-15-data-science
