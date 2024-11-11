@@ -1,0 +1,9 @@
+# Hierachical Clustering.
+
+Load the data.
+Scale the data.
+Create dendogram of the clustering.
+Choose an appropriate threshold for the clusters.
+Classify all points based on the number of clusters at the threshold you chose.
+
+Visualize the clusters.

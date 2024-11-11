@@ -1,0 +1,42 @@
+# Data Cleaning
+
+We want to singularize guitarists and students.
+## Bag of Words Using CountVectorizer
+### Your Turn
+
+1. Write 4 sentences of your choice.
+
+2. Run the `CountVectorizer` on your sentences.
+
+3. Print the results in a data frame.
+## TF-IDF
+### Your Turn
+
+1. Use the `TfidfTransformer` to transform the bag of words matrix you created above to TF-IDF.
+
+2. Print out the results in a data frame.
+# Another Example - Using Wikipedia API
+### Clean the text - version 1
+
+
+
+Using string replace.
+
+
+
+### Clean the text - version 2
+
+
+
+Using a for..loop and string replace.
+
+
+
+
+
+### Clean the text - version 3
+
+
+
+Using a regular expression.
+

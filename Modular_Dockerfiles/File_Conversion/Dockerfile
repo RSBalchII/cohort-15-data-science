@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     html2text \
     texlive-xetex \
     texlive-fonts-recommended \
+    jq \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
