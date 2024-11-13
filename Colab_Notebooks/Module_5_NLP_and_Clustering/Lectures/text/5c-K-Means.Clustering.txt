@@ -1,6 +1,0 @@
-# Example with Making Blobs
-## KMeans
-## Example with Pima Indians Dataset
-## KMeans
-## Choosing K - the elbow method
-# Fit again with k = 3
