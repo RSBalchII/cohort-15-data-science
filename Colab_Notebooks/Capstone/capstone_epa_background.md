@@ -10,7 +10,7 @@ Based on the information provided, here's a comprehensive breakdown of the summa
    - To offer new functionality to users through modern interfaces and technologies
    - To consolidate and streamline existing systems
 
-3. CAMPD replaced the older Air Markets Program Data (AMPD) tool in June 2022, offering improved access to data on allowances, compliance, emissions, and facility attributes.
+3. CAMPD replaced the older Air Markets Program Data (CAMPD) tool in June 2022, offering improved access to data on allowances, compliance, emissions, and facility attributes.
 
 4. ECMPS 2.0 is a new web-based version of the Emissions Collection and Monitoring Plan System, replacing the older desktop application.
 
